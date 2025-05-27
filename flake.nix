@@ -20,8 +20,7 @@
             '';
           installPhase = ''
             mkdir $out
-            cp -r _build $out/_build/
-            cp -r src $out/src/
+            cp -r web/. $out
           '';
         };
       }

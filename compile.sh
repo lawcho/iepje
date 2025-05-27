@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 
-SOURCE=src/Iepje/Examples/Gallery.agda
+# Script to build the Iepje examples gallery
 
-echo Compiling examples to JS
-agda $SOURCE --js --js-es6 --compile-dir=_build/js/
-echo Compiling examples to HTML
-agda $SOURCE --html --html-dir=_build/html/
+AGDA_SRC=src/Iepje/Examples/Gallery.agda
+OTHER_SRC="src/Iepje/Examples/index.html src/Iepje/Examples/style.css"
+
+set -x
+mkdir -p web/
+agda $AGDA_SRC --js --js-es6 --compile-dir=web/js/
+agda $AGDA_SRC --html --html-dir=web/html/
+cp $OTHER_SRC web/

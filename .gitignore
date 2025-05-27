@@ -1,3 +1,15 @@
+# Caches
+########
+
+# Agda type-checking cache
 _build/
+# For the 'direnv' dev tool
 .direnv/
+
+# Build outputs
+###############
+
+# Local, un-sandboxed build
+web/
+# Nixified build
 result

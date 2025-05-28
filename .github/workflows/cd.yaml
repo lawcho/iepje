@@ -1,0 +1,41 @@
+# GitHub script for 'continuous deployment',
+# i.e. automatically re-building & publishing the website
+# when sources change in the master branch
+
+name: Deploy examples gallery
+
+on:
+  push:
+    branches: ["master"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            extra-trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=
+            extra-substituters = https://cache.garnix.io
+      - run: nix build --out-link _site
+      - uses: actions/upload-pages-artifact@v3
+  # GitHub recommends putting deploy in a dedicated job
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/deploy-pages@v4
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+# Implementaton adapted from
+# https://github.com/compiling-to-categories/concat/blob/7aa7d5ebe165161b7c0aafb8af006020534eaf70/.github/workflows/pages.yml

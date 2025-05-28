@@ -3,8 +3,9 @@
 
 module Iepje.Prelude where
 
-open import Iepje.Internal.Gloss  public
-open import Iepje.Internal.Html   public
+open import Iepje.Internal.Gloss            public
+open import Iepje.Internal.Doc.Core         public
+open import Iepje.Internal.Doc.Combinators  public
 
 open import Iepje.Internal.JS.Language.IO
   using (IO)

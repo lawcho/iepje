@@ -9,6 +9,8 @@ open import Iepje.Internal.JS.WebAPIs.CSSOM
 open import Iepje.Internal.JS.Language.IO
 open import Iepje.Internal.JS.Language.GlobalObjects
   hiding (String; Number; BigInt; Boolean; Symbol)  -- footguns
+  hiding (null) -- clashes with the name of the type
+open import Iepje.Internal.JS.Language.Union
 open import Iepje.Internal.JS.Language.PrimitiveTypes
 open import Iepje.Internal.JS.Language.SubTyping
 
@@ -63,20 +65,8 @@ postulate
   Text : Set
   instance sup-Text : Text extends CharacterData
 
-  -- Sub-types of HTMLElement
-  -- https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API#html_element_interfaces_2
-
   HTMLElement : Set
   instance sup-HTMLElement : HTMLElement extends Element
-
-  HTMLBodyElement : Set
-  instance sup-HTMLBodyElement : HTMLBodyElement extends HTMLElement
-
-  HTMLButtonElement : Set
-  instance sup-HTMLButtonElement : HTMLButtonElement extends HTMLElement
-
-  HTMLUnknownElement : Set
-  instance sup-HTMLUnknownElement : HTMLUnknownElement extends HTMLElement
 
 ----------------------------------------------------------------
 -- Value level bindings with simple types
@@ -87,16 +77,26 @@ postulate
 postulate appendChild : Node → Node → IO Node
 {-# COMPILE JS appendChild = p => c => kn => kn(p.appendChild(c)) #-}
 
-postulate ownerDocument : Node → IO Document
-{-# COMPILE JS ownerDocument = n => kd => kd(n.ownerDocument) #-}
+postulate removeChild : Node → Node → IO Node
+{-# COMPILE JS removeChild = p => c => kn => kn(p.removeChild(c)) #-}
+
+postulate get-ownerDocument : Node → IO Document
+{-# COMPILE JS get-ownerDocument = n => kd => kd(n.ownerDocument) #-}
+
+postulate get-nextSibling : Node → IO (Node ∪ null)
+{-# COMPILE JS get-nextSibling = n => knon => knon(n.nextSibling) #-}
+
+postulate insertBefore : Node → Node → Node ∪ null → IO Node
+-- could also return a DocumentFragment, but that is a sub-type of Node
+{-# COMPILE JS insertBefore = n1 => n2 => n3 => kn => kn(n1.insertBefore(n2,n3)) #-}
 
 -- Element
 
-postulate set-innerHTML : Element → string → IO string
-{-# COMPILE JS set-innerHTML = e => s => ks => ks(e.innerHTML = s) #-}
-
 postulate setAttribute : Element → string → string → IO undefined
 {-# COMPILE JS setAttribute = e => sk => sv => kt => kt(e.setAttribute(sk,sv)) #-}
+
+postulate removeAttribute : Element → string → IO undefined
+{-# COMPILE JS removeAttribute = e => sk => kt => kt(e.removeAttribute(sk)) #-}
 
 -- This is a var-args function
 postulate replaceChildren : Element → List Node → IO undefined
@@ -113,25 +113,17 @@ postulate get-style : HTMLElement → IO CSSStyleDeclaration
 postulate document : IO Document  --JS global variable
 {-# COMPILE JS document = kd => kd(document) #-}
 
-postulate getElementById : Document → string → IO Element
-{-# COMPILE JS getElementById = d => s => ke => ke(d.getElementById(s)) #-}
-
-postulate querySelector : Document → string → IO Element
+postulate querySelector : Document → string → IO (Element ∪ null)
 {-# COMPILE JS querySelector = d => s => ke => ke(d.querySelector(s)) #-}
 
 postulate get-defaultView : Document → IO Window
 {-# COMPILE JS get-defaultView = d => kw => kw(d.defaultView) #-}
 
--- The 'document.body' property can technically contain a HTMLFrameSetElement,
--- but HTMLFrameSetElement is deprecated in HTML5 so this library ignores it
-postulate get-body : Document → IO HTMLBodyElement
-{-# COMPILE JS get-body = d => kn => kn(d.body) #-}
-
-postulate set-body : Document → HTMLBodyElement → IO HTMLBodyElement
-{-# COMPILE JS set-body = d => b => kn => kn(d.body) #-}
-
 postulate createTextNode : Document → string → IO Text
 {-# COMPILE JS createTextNode = d => s => kt => kt(d.createTextNode(s)) #-}
+
+postulate createElement : Document → string → IO HTMLElement
+{-# COMPILE JS createElement = d => s => k => k(d.createElement(s)) #-}
 
 -- Window
 
@@ -166,18 +158,6 @@ postulate key : KeyboardEvent → IO string
 
 -- The least precise supertypes were determined by reading the MDN docs
 
--- Calculates the most precise sub-type of Element produced by createElement
-Element-of : string → Σ Set (_extends* HTMLElement)
-Element-of "button" = HTMLButtonElement , it
-Element-of "body"   = HTMLBodyElement   , it
--- Some strings (e.g. "buTtoN") are recognized by the browser,
--- but are not in the list above, so the catch-all case of this function
--- returns HTMLElement rather than HTMLUnknownElement
-Element-of _        = HTMLElement       , it
-
-postulate createElement : Document → (s : string) → IO (Element-of s .fst)
-{-# COMPILE JS createElement = d => s => k => k(d.createElement(s)) #-}
-
 -- Calculates the most precise sub-type of Event provided to addEventListener's callback
 Event-of : string → Σ Set (_extends* Event)
 Event-of "click"    = PointerEvent  , it
@@ -185,7 +165,22 @@ Event-of "keydown"  = KeyboardEvent , it
 Event-of "keyup"    = KeyboardEvent , it
 Event-of _          = Event         , it
 
-postulate addEventListener : EventTarget → (s : string) → (Event-of s .fst → IO ⊤) → IO undefined
-{-# COMPILE JS addEventListener = et => s => callback => k => k(et.addEventListener(s,e => callback(e)(_=>{}))) #-}
--- The second arg to the callback runs the IO action
- 
+-- Type of raw JS event listener functions, as described in
+-- https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#the_event_listener_callback
+postulate event-listener : string → Set
+-- the string parameter allows restricting types later
+
+-- Constructs an event-listener function ready for use in addEventListener and removeEventListener
+postulate mk-event-listener : ∀{s} → (Event-of s .fst → IO ⊤) → IO (event-listener s)
+{-# COMPILE JS mk-event-listener = _ => f => k => k(e => f(e)(_ => {})) #-}
+-- Passing a second argument to f runs the IO action
+-- mk-event-listener returns an IO-wrapped value to prevent over-inlining by Agda,
+-- which could break JS-function-pointer-equalities
+
+postulate addEventListener : EventTarget → (s : string) → event-listener s → IO undefined
+{-# COMPILE JS addEventListener = et => s => callback => k => k(et.addEventListener(s,callback)) #-}
+-- The second arg to the callback runs the IO actions
+
+postulate removeEventListener : EventTarget → (s : string) → event-listener s → IO undefined
+{-# COMPILE JS removeEventListener = et => s => callback => k => k(et.removeEventListener(s,callback)) #-}
+-- The return type of removeEventListener is unclear (MDN docs say 'None'), so 'undefined' is a guess here

@@ -6,7 +6,7 @@
 module Iepje.Internal.JS.Language.GlobalObjects where
 
 open import Iepje.Internal.JS.Language.IO
-open import Iepje.Internal.JS.Language.PrimitiveTypes
+open import Iepje.Internal.JS.Language.PrimitiveTypes as Types hiding (null)
 
 -- Some JS primitive types have similarly-named object types.
 -- However, these are not interchangeable. See
@@ -21,3 +21,7 @@ postulate Object : Set
 
 postulate now : IO number
 {-# COMPILE JS now = kn => kn(Date.now()) #-}
+
+-- null
+
+postulate null : Types.null

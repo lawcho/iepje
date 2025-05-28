@@ -1,4 +1,3 @@
-
 -- A module to dump misc. helper functions like `map`
 
 module Iepje.Internal.Utils where
@@ -76,6 +75,9 @@ _∘_ : (B → C) → (A → B) → (A → C)
 case_of_ : A → (A → B) → B
 case x of f = f x
 
+const : A → B → A
+const a _ = a
+
 if_then_else_ : Bool → A → A → A
 if true  then t else _ = t
 if false then _ else e = e
@@ -87,6 +89,9 @@ _++_ = primStringAppend
 infixl 20 _++_
 
 -- IO
+
+-- Various generalizations of _$_
+-- (Haskell naming convention)
 
 _<$>_ : (A → B) → IO A → IO B
 f <$> ma = do a ← ma; pure (f a)
@@ -113,6 +118,27 @@ _<=<_ : (B -> IO C) -> (A -> IO B) -> A -> IO C
   b ← fmb a
   c ← fmc b
   pure c
+
+-- Helper for type of _$$_
+IO? : Bool → Set → Set
+IO? false A =    A
+IO? true  A = IO A
+
+-- Helper for body of _$$_
+from-IO? : ∀ b → IO? b A → IO A
+from-IO? false = pure
+from-IO? true ma = ma
+
+-- Operator generalizing _$_ _<$>_ _<*>_ _=<<_ flap etc.
+_$$_ : ∀{x y z} → IO? x (A → IO? y B) → IO? z A → IO B
+_$$_ {x = x}{y = y}{z = z} mfm ma = do
+  fm ← from-IO? x mfm
+  a ← from-IO? z ma
+  from-IO? y (fm a)
+
+infixl 20 _$$_
+
+-- Other IO
 
 void : IO A → IO ⊤
 void m = m >> pure tt

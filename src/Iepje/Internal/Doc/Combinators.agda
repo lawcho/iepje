@@ -1,34 +1,17 @@
 
--- User-friendly Html combinators
+-- User-friendly combinators for writing Doc s
 
--- Design priorities:
-
--- 1. Ergonomic use
--- 2. Easy implementation
--- 3. Enforcement of well-formed HTML
-
-module Iepje.Internal.Html where
+module Iepje.Internal.Doc.Combinators where
 
 open import Iepje.Internal.Utils hiding (_>>_)
 
 import      Iepje.Internal.JS.WebAPIs.DOM as DOM
 open import Iepje.Internal.JS.Language.IO using (IO; pure)
 
+open import Iepje.Internal.Doc.Core
 open import Agda.Builtin.String
-open import Agda.Builtin.Sigma
 open import Agda.Builtin.List
-
-module _ (event : Set) where
-  data Doc : Set where
-    tag : String → Doc → Doc
-    text : String → Doc
-    attr : String → String → Doc -- applies to the *parent* element
-    style : String → String → Doc -- applies to the *parent* element
-    onIO : (js-event-name : String)
-      → (DOM.Event-of js-event-name .fst → IO event)
-      → Doc
-    append : Doc → Doc → Doc
-    empty : Doc
+open import Agda.Builtin.Sigma
 
 private variable e a b : Set
 

@@ -1,9 +1,7 @@
 
 -- Video game from 1972
 
--- Demonstrates fancy styling & keyboard bindings
-
--- Controls are currently broken due to focus loss every update
+-- Demonstrates fancy styling, keyboard bindings, and focus retention
 
 module Iepje.Examples.Pong where
 
@@ -30,7 +28,7 @@ record Paddle : Set where
   field y y' : Float
   field goals-conceded : Nat
 open Paddle
-paddle-height = 35.0
+paddle-height = 90.0
 paddle-width  = 5.0
 paddle-offset = 10.0
 
@@ -169,12 +167,12 @@ pong = play "#pong-game"
   initial-Field
   view-Field
   (λ where
-    ↑| f → record f {left  = set-y' -10.0 (f .left )}
-    -| f → record f {left  = set-y'   0.0 (f .left )}
-    ↓| f → record f {left  = set-y'  10.0 (f .left )}
-    |↑ f → record f {right = set-y' -10.0 (f .right)}
-    |- f → record f {right = set-y'   0.0 (f .right)}
-    |↓ f → record f {right = set-y'  10.0 (f .right)}
+    ↑| f → record f {left  = set-y' -5.0 (f .left )}
+    -| f → record f {left  = set-y'  0.0 (f .left )}
+    ↓| f → record f {left  = set-y'  5.0 (f .left )}
+    |↑ f → record f {right = set-y' -5.0 (f .right)}
+    |- f → record f {right = set-y'  0.0 (f .right)}
+    |↓ f → record f {right = set-y'  5.0 (f .right)}
     other f → f)
   (λ _ → step-field)
  

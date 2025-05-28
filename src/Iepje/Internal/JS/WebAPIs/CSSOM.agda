@@ -24,3 +24,6 @@ postulate
 
 postulate setProperty : CSSStyleDeclaration → String → String → IO undefined
 {-# COMPILE JS setProperty = sd => k => v => kt => kt(sd.setProperty(k,v)) #-}
+
+postulate removeProperty : CSSStyleDeclaration → String → IO string
+{-# COMPILE JS removeProperty = sd => k => kv => kv(sd.removeProperty(k)) #-}

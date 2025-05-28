@@ -1,9 +1,7 @@
 
 -- A stopwatch with the usual buttons
 
--- Demonstrates fancy styling & subscription to time
-
--- Controls are currently broken due to focus loss every update
+-- Demonstrates fancy styling, subscription to time, and focus retention
 
 module Iepje.Examples.Stopwatch where
 
@@ -81,6 +79,7 @@ stopwatch = play "#stopwatch-app"
       }
   )
   λ extra-seconds s →
+    if not (s .running) then s else
     let extra-millis = primFloatRound $ primFloatTimes extra-seconds 1000.0
     in record s {count = s .count +
       case extra-millis of λ where

@@ -3,8 +3,10 @@
 
 module Iepje.Internal.Runtime where
 
-import      Iepje.Internal.Renderer as Renderer
-open import Iepje.Internal.Html as Html using (Doc)
+import      Iepje.Internal.Renderer.Merging as Renderer
+open import Iepje.Internal.Renderer.vDOM using (vDOM)
+open import Iepje.Internal.Doc.Core as Html
+import      Iepje.Internal.Doc.Combinators as Html
 
 open import Iepje.Internal.Utils
 
@@ -55,7 +57,7 @@ apply-update-and-schedule-refresh rs update = do
   schedule-refresh rs
 
 -- Add a view to a Runtime-Store, under an existing Element
--- The view is re-rendered from scratch each update
+-- The view is re-rendered incrementally each update
 addView
   : ∀{model event}
   → Runtime-Store model
@@ -63,20 +65,25 @@ addView
   → (event → model → IO model)
   → DOM.HTMLElement
   → IO ⊤
-addView rs view update el = do
+addView rs view update parent = do
+  -- Delete all children of the element, to ensure the vDOM matches
+  DOM.replaceChildren (up parent) []
+  -- Create a muable reference cell to track the state of this view
+  rvd ← new vDOM.empty
+  -- Create a callback which renders this view when called
+  let renderThisView = do
+    m ← get $ rs .current-model
+    doc ← view m  -- Generate the (declarative) Doc
+      -- Modify the Doc's callbacks to re-enter the runtime
+      <&> Html.mapDocIO λ e →
+        apply-update-and-schedule-refresh rs (update e)
+    -- Render, imperatively updating the browser's DOM.
+    vd ← get rvd
+    vd' ← Renderer.render parent vd doc
+    -- Store the vDOM tracking the new browser DOM
+    set rvd vd'
   -- Add this view's rendering callback to the store
   -- so that updates due to other views will also refresh this view
   modify (rs .on-animation-tick-hooks) (renderThisView ∷_)
   -- Render the initial view (replaces el & sets up callbacks)
   renderThisView
-  where
-    -- Callback: every animation frame, when the model is dirty...
-    renderThisView : IO ⊤
-    renderThisView = do
-      m ← get $ rs .current-model
-      doc ← view m  -- Generate the (declarative) Doc
-        -- Modify the Doc's callbacks to re-enter the runtime
-        <&> Html.mapDocIO λ e →
-          apply-update-and-schedule-refresh rs (update e)
-      DOM.replaceChildren (up el) []  -- Clear el
-      Renderer.appendInto (up el) doc -- Render into el

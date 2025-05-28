@@ -6,9 +6,8 @@
 
 module Iepje.Internal.Gloss where
 
-open import Iepje.Internal.Html as Html hiding (_>>_)
+open import Iepje.Internal.Doc.Core
 
-import      Iepje.Internal.Renderer as Renderer
 import      Iepje.Internal.Runtime as Runtime
 
 open import Iepje.Internal.Utils
@@ -16,6 +15,7 @@ import      Iepje.Internal.JS.WebAPIs.DOM as DOM
 
 open import Iepje.Internal.JS.Language.IO
 open import Iepje.Internal.JS.Language.SubTyping
+open import Iepje.Internal.JS.Language.FromUnion
 
 import Iepje.Internal.JS.Language.GlobalObjects
   as Date using (now)
@@ -32,26 +32,7 @@ private variable
   world model : Set
   event : Set
 
-CssSelector = String 
-
-private
-  -- Create an element that can be rendered into, underneath a given id
-  createDivUnder : String → IO DOM.HTMLElement
-  createDivUnder sel = do
-    d ← DOM.document
-    el ← DOM.querySelector d sel
-    div ← DOM.createElement d "div"
-    DOM.appendChild (up el) (up div)
-    pure div
-
--- Display the given document in a DOM node
-display
-  : CssSelector -- Element to display under
-  → Doc ⊤       -- Document to display
-  → IO ⊤
-display sel doc = do
-    div ← createDivUnder sel
-    Renderer.appendInto div doc
+CssSelector = String
 
 -- Impure version of play
 playIO
@@ -67,7 +48,10 @@ playIO sel freq m0 view update step = do
   d ← DOM.document
   w ← DOM.get-defaultView d
   -- Add the view
-  div ← createDivUnder sel
+  just p ← from-∪-null <$> DOM.querySelector d sel
+    where nothing → pure tt
+  div ← DOM.createElement d "div"
+  DOM.appendChild (up p) (up div)
   Runtime.addView rs view update (up div)
   -- Set up periodic updates, if the user requested them
   case freq of λ where
@@ -123,3 +107,10 @@ interact sel m0 view update = do
   interactIO sel m0
     (λ   m → pure $ view     m)
     (λ e m → pure $ update e m)
+
+-- Display the given document in a DOM node
+display
+  : CssSelector -- Element to display under
+  → Doc ⊤       -- Document to display
+  → IO ⊤
+display sel doc = interact sel tt (const doc) const

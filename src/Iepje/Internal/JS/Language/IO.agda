@@ -11,7 +11,7 @@ module Iepje.Internal.JS.Language.IO where
 -- * Agda.Builtin.IO.IO might be used by other libraries
 -- * Which might use another JS-side implementation
 -- * defining `IO = Agda.Builtin.IO.IO` would give users a false sense of compatability
--- * If compatability is desired, users can postulate conversion functiosn themselves
+-- * If compatability is desired, users can postulate conversion functions themselves
 postulate IO : Set → Set
 
 -- IO is implemented in CPS because...

@@ -12,6 +12,7 @@ open import Iepje.Internal.Doc.Core
 open import Agda.Builtin.String
 open import Agda.Builtin.List
 open import Agda.Builtin.Sigma
+open import Agda.Builtin.Bool
 
 private variable e a b : Set
 
@@ -86,6 +87,9 @@ mapDoc f d = mapDocIO (pure ∘ f) d
 forDoc : ∀{a b} → Doc a → (a → b) → Doc b
 forDoc d f = forDocIO d (pure ∘ f)
 
--- Map over a list, producing a docs and concatenating them
-foldMapDoc : ∀{a b : Set} → (a → Doc b) → List a → Doc b
-foldMapDoc f = foldr (λ a d → f a >> d) empty
+when : Bool → Doc a → Doc a
+when true a = a
+when false _ = empty 
+
+concatDocs : List (Doc a) → Doc a
+concatDocs = foldr _>>_ empty

@@ -15,8 +15,9 @@ open import Iepje.Internal.Utils
   using
     (case_of_ ; if_then_else_
     ;_$_ ; _&_  ; _∘_
+    ; map ; for ; for' ; length
     ; not ; _&&_ ; _||_
-    ; _/_ ; _%_
+    ; enumerate ; min ; max ; _/_ ; _%_
     ; _++_
     )
   public

@@ -25,14 +25,28 @@ map : (A → B) → List A → List B
 map _ [] = []
 map f (x ∷ xs) = f x ∷ map f xs
 
+map' :  (Nat → A → B) → List A → List B
+map' f = go 0 where
+  go : Nat → List _ → List _
+  go n [] = []
+  go n (x ∷ l) = f n x ∷ go (suc n) l
+
+length : List A → Nat
+length [] = 0
+length (_ ∷ xs) = 1 + length xs
+
 for :  List A → (A → B) → List B
 for l f = map f l
+
+for' :  List A → (Nat → A → B) → List B
+for' l f = map' f l
 
 foldr : (A → B → B) → B → List A → B
 foldr f z = go where
   go : _ → _
   go []         = z
   go (y ∷ ys) = f y (go ys)
+
 
 -- Booleans
 
@@ -49,16 +63,6 @@ _||_ : Bool → Bool → Bool
 false || false = false
 _     || _      = true
 infixl 3 _||_
-
--- Nats
-
-_/_ : Nat → Nat → Nat
-n / m = div-helper 0 (m - 1) n (m - 1)
-infixl 22 _/_
-
-_%_ : Nat → Nat → Nat
-n % m = mod-helper 0 (m - 1) n (m - 1)
-infixl 22 _%_
 
 -- Control flow
 
@@ -82,6 +86,26 @@ if_then_else_ : Bool → A → A → A
 if true  then t else _ = t
 if false then _ else e = e
 infixr 20 if_then_else_
+
+-- Nats
+
+enumerate : Nat → List Nat
+enumerate zero = []
+enumerate (suc n) = n ∷ enumerate n
+
+min : Nat → Nat → Nat
+min m n = if m < n then m else n
+
+max : Nat → Nat → Nat
+max m n = if m < n then n else m
+
+_/_ : Nat → Nat → Nat
+n / m = div-helper 0 (m - 1) n (m - 1)
+infixl 22 _/_
+
+_%_ : Nat → Nat → Nat
+n % m = mod-helper 0 (m - 1) n (m - 1)
+infixl 22 _%_
 
 -- Strings
 

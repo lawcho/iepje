@@ -86,6 +86,9 @@ postulate get-ownerDocument : Node → IO Document
 postulate get-nextSibling : Node → IO (Node ∪ null)
 {-# COMPILE JS get-nextSibling = n => knon => knon(n.nextSibling) #-}
 
+postulate get-firstChild : Node → IO (Node ∪ null)
+{-# COMPILE JS get-firstChild = n => knon => knon(n.firstChild) #-}
+
 postulate insertBefore : Node → Node → Node ∪ null → IO Node
 -- could also return a DocumentFragment, but that is a sub-type of Node
 {-# COMPILE JS insertBefore = n1 => n2 => n3 => kn => kn(n1.insertBefore(n2,n3)) #-}

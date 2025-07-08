@@ -61,7 +61,7 @@ insert parent cursor = go where
   insert-Node n = do
     right-sib ← Ref.get cursor >>= λ where
       (after left-sib) → DOM.get-nextSibling left-sib
-      at-beginning     → pure (inj₂ null)
+      at-beginning     → DOM.get-firstChild (up parent)
     DOM.insertBefore (up parent) (up n) right-sib
     curse n
 

@@ -30,6 +30,9 @@ clear p (text e _)  = void $ DOM.removeChild (up p) (up e)
 clear p (style k _) = void $ do sd ← DOM.get-style (up p); CSSOM.removeProperty sd k
 clear p (attr k _)  = void $ DOM.removeAttribute (up p) k
 clear p (onIO n k) = void $ DOM.removeEventListener (up p) n k
+clear p (doc-onIO n k) = void $ do
+  hd ← DOM.get-ownerDocument (up p)
+  DOM.removeEventListener (up hd) n k
 clear p (append d1 d2) = do clear p d1 ; clear p d2
 clear p empty = pure tt
 
@@ -65,23 +68,29 @@ insert parent cursor = go where
     DOM.insertBefore (up parent) (up n) right-sib
     curse n
 
-  hd = DOM.get-ownerDocument (up parent)
-
   -- Main traversal function
   go : Doc → IO vDOM
   go (tag t cd) = do
-    el ← DOM.createElement $$ hd $$ t
+    hd ← DOM.get-ownerDocument (up parent)
+    el ← DOM.createElement hd t
     ccursor ← Ref.new at-beginning
     vDOM.tag $$ insert-Node el $$ t $$ insert el ccursor cd
 
   go (text txt) = do
-    el ← DOM.createTextNode $$ hd $$ txt
+    hd ← DOM.get-ownerDocument (up parent)
+    el ← DOM.createTextNode hd txt
     vDOM.text $$ insert-Node el $$ txt
 
   go (onIO n k) = do
     l ← DOM.mk-event-listener k
     DOM.addEventListener (up parent) n l
     pure $ onIO n l
+
+  go (doc-onIO n k) = do
+    hd ← DOM.get-ownerDocument (up parent)
+    l ← DOM.mk-event-listener k
+    DOM.addEventListener (up hd) n l
+    pure $ doc-onIO n l
 
   go (append dL dR) = vDOM.append $$ go dL $$ go dR
   go (style k v)    = vDOM.style $$ k $$ v -- Style ignored

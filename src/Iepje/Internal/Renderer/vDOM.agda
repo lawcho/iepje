@@ -18,6 +18,7 @@ data vDOM : Set where
   text  : DOM.Text → String → vDOM
   attr  : String → String → vDOM
   style : String → String → vDOM
-  onIO  : (n : String) → DOM.event-listener n → vDOM
+  onIO     : (n : String) → DOM.event-listener n → vDOM
+  doc-onIO : (n : String) → DOM.event-listener n → vDOM
   append : vDOM → vDOM → vDOM
   empty : vDOM

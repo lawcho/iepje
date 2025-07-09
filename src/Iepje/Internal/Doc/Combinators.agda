@@ -19,10 +19,11 @@ _>>_ : Doc e → Doc e → Doc e
 _>>_ = append
 infixl 20 _>>_
 
-on : (js-event-name : String)
+on doc-on : (js-event-name : String)
     → (DOM.Event-of js-event-name .fst → e)
     → Doc e
 on s h = onIO s (pure ∘ h)
+doc-on s h = doc-onIO s (pure ∘ h)
 
 on-key-down on-key-up : (String → e) → Doc e
 on-key-down decode = onIO "keydown" λ e → decode <$> DOM.key e
@@ -72,6 +73,7 @@ mapDocIO {a} {b} f = go where
   go (attr k v) = attr k v
   go (style k v) = style k v
   go (onIO js-event-name g) = onIO js-event-name (f <=< g)
+  go (doc-onIO js-event-name g) = doc-onIO js-event-name (f <=< g)
   go (append d1 d2) = append (go d1) (go d2)
   go empty = empty
 

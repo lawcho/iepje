@@ -15,7 +15,10 @@ data Doc : Set where
   text : String → Doc
   attr : String → String → Doc -- applies to the *parent* element
   style : String → String → Doc -- applies to the *parent* element
-  onIO : (js-event-name : String)
+  onIO : (js-event-name : String) -- applies to the *parent* element
+    → (DOM.Event-of js-event-name .fst → IO event)
+    → Doc
+  doc-onIO : (js-event-name : String) -- applies to the root document
     → (DOM.Event-of js-event-name .fst → IO event)
     → Doc
   append : Doc → Doc → Doc

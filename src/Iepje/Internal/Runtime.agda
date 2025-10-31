@@ -3,8 +3,12 @@
 
 module Iepje.Internal.Runtime where
 
-import      Iepje.Internal.Renderer.Merging as Renderer
-open import Iepje.Internal.Renderer.vDOM using (vDOM)
+import      Iepje.Internal.Renderer.vDOM    as vDOM
+import      Iepje.Internal.Renderer.Cursor  as Cursor
+import      Iepje.Internal.Renderer.Darn    as Renderer
+import      Iepje.Internal.Renderer.vDOM    as Renderer
+import      Iepje.Internal.Renderer.Style   as Renderer
+
 open import Iepje.Internal.Doc.Core as Html
 import      Iepje.Internal.Doc.Combinators as Html
 
@@ -77,9 +81,11 @@ addView rs view update parent = do
       -- Modify the Doc's callbacks to re-enter the runtime
       <&> Html.mapDocIO λ e →
         apply-update-and-schedule-refresh rs (update e)
+    
     -- Render, imperatively updating the browser's DOM.
     vd ← get rvd
-    vd' ← Renderer.render parent vd doc
+    vd' ← Renderer.darn vd doc  =<< Cursor.init parent
+    Renderer.re-style vd'       =<< Cursor.init parent
     -- Store the vDOM tracking the new browser DOM
     set rvd vd'
   -- Add this view's rendering callback to the store

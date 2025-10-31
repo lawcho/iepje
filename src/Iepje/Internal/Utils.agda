@@ -121,6 +121,9 @@ _<$>_ : (A → B) → IO A → IO B
 f <$> ma = do a ← ma; pure (f a)
 infixr 21 _<$>_
 
+_<$_ : A → IO B → IO A
+a <$ fb = const a <$> fb
+
 _<&>_ : IO A → (A → B) → IO B
 x <&> f = f <$> x
 
@@ -133,6 +136,9 @@ ma << mb = mb >> ma
 _<*>_ : IO (A → B) → IO A → IO B
 mf <*> mx = do f ← mf; x ← mx; pure (f x)
 infixl 20 _<*>_
+
+_<*_ : IO A → IO B → IO A
+fa <* fb = const <$> fa <*> fb
 
 _=<<_ : (A → IO B) → IO A → IO B
 fmb =<< ma = ma >>= fmb

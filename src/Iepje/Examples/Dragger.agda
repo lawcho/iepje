@@ -62,46 +62,8 @@ dragging m = case m .caret-pos of λ where
 
 view : Model → Doc Event
 view m = col do
-  doc-on "mouseup" λ _ → drop-marker  -- TODO: place on doc instead
+  doc-on "mouseup" λ _ → drop-marker
   doc-on "blur" λ _ → cancel-drag
-  -- TODO: support for doc-wide event lsiteners, via new Doc constructor (onDocIO : (n : String) → (event-of n → e) → Doc e)
-  -- TODO: support out-of-window drag handling:
-  --  * mouse-Y extraction from mouse move
-  --  * bounding box extraction
-  --    * new Doc constructor (e.g. afterRender : Node → e → Doc e)
-  --    * getBoundingClientRect()
-  --  * still brittle, since cannot listen for changes to position, see https://github.com/whatwg/html/issues/9104
-  --  * N.B. pointer capture might simplify focus handling, but not coordiante handling:
-  --    https://developer.mozilla.org/en-US/docs/Web/API/Element/setPointerCapture
-  --  * alternative: drag-n-drop with super-wide ghost image + intersection listener,
-  --    https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#setting_the_drag_feedback_image
-
--- In raw JS:
-
--- document.querySelectorAll(".hitbox").forEach(el => {
---   document.addEventListener("mousedown", e => {
---     const onMove = e => {
---       let my = e.clientY;
---       const rect = el.getBoundingClientRect();
---       if (my < rect.top) {
---           el.textContent = "↑";
---       } else if (my > rect.bottom) {
---           el.textContent = "↓";
---       } else {
---         el.textContent = "-";
---       }
---     };
---     onMove(e);
---     document.addEventListener("mousemove", onMove);
---     document.addEventListener("mouseup", _ => document.removeEventListener("mousemove", onMove));
---     document.addEventListener("blur", _ => document.removeEventListener("mousemove", onMove));
---   });
--- })
-
-
-
-
-
 
   let mi = m .marker-pos
   let ci = case m .caret-pos of λ where (just ci) → ci; nothing → mi

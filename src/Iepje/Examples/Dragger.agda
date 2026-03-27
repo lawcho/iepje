@@ -1,4 +1,8 @@
 
+-- Widget with drag-and-drop divider
+
+-- Demonstrates dropzones, focus retention despite varying size
+
 module Iepje.Examples.Dragger where
 
 open import Iepje.Prelude

@@ -12,6 +12,7 @@ open import Iepje.Internal.Renderer.Delete
 
 open import Iepje.Internal.Renderer.vDOM
 open import Iepje.Internal.Renderer.Cursor
+open import Iepje.Internal.Renderer.SubtypingLemmas
 
 open import Iepje.Internal.Utils
 open import Iepje.Internal.JS.Language.IO
@@ -20,6 +21,11 @@ open import Iepje.Internal.JS.WebAPIs.DOM
 
 open import Agda.Builtin.String
 open import Agda.Builtin.Bool
+open import Agda.Builtin.Equality
+
+postulate
+  -- This could go in Agda.Builtin.String.Properties, but it is not there
+  primStringEqualitySound : ∀ s1 s2 → primStringEquality s1 s2 ≡ true → s1 ≡ s2
 
 private
   _==_ : String → String → Bool
@@ -29,13 +35,15 @@ open Cursor
 
 -- Precondition: cursor at beginning of rendered vDOM
 darn : vDOM → Doc → Cursor → IO vDOM
-darn d₀ d₁ c
-  using redo ← do delete d₀ c ; insert d₁ c
-  using when ← if_then_else redo
-  with d₀ | d₁
 -- These cases may contain focus to preserve
-... | text e t₀    | text t₁    = when (t₀ == t₁) do text e t₀                             <$ curse (up e) c
-... | tag  e t₀ d₀ | tag  t₁ d₁ = when (t₀ == t₁) do tag  e t₀ <$> (darn d₀ d₁ =<< init e) <* curse (up e) c
-... | append l₀ r₀ | append l₁ r₁ = append <$> darn l₀ l₁ c <*> darn r₀ r₁ c
+darn (append l₀ r₀) (append l₁ r₁) c = append <$> darn l₀ l₁ c <*> darn r₀ r₁ c
+darn (text t₀ e   ) (text t₁     ) c with t₀ == t₁
+darn (text t₀ e   ) (text t₁     ) c | true  = do text t₀ e <$ curse (up e) c
+darn (d₀          ) (d₁          ) c | false = do delete d₀ c; insert d₁ c
+darn (tag  t₀ e d₀) (tag' t₁ f₁  ) c with t₀ == t₁ in eq
+darn (tag  t₀ e d₀) (tag' t₁ f₁  ) c | true  = do tag  t₀ e <$> (darn d₀ (f₁ (up {{lem3 t₀ t₁ (primStringEqualitySound t₀ t₁ eq)}} e))
+                                                                      =<< init (up {{lem1 t₀}} e))
+                                                                      <* curse (up {{lem2 t₀}} e) c
+darn (d₀          ) (d₁          ) c | false = do delete d₀ c; insert d₁ c
 -- Anything else? Naively delete & re-insert.
-... | _ | _ = redo
+darn d₀ d₁ c = do delete d₀ c; insert d₁ c

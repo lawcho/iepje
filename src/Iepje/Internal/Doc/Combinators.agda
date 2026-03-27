@@ -30,6 +30,9 @@ on-key-down on-key-up : (String → e) → Doc e
 on-key-down decode = onIO "keydown" λ e → decode <$> DOM.key e
 on-key-up   decode = onIO "keyup"   λ e → decode <$> DOM.key e
 
+tag : String → Doc e → Doc e
+tag t d = tag' t λ _ → d
+
 div : Doc e → Doc e
 div = tag "div"
 
@@ -69,7 +72,7 @@ br = tag "br" empty
 mapDocIO : ∀{a b} → (a → IO b) → Doc a → Doc b
 mapDocIO {a} {b} f = go where
   go : Doc a → Doc b
-  go (tag t d) = tag t (go d)
+  go (tag' t f) = tag' t λ e → (go (f e))
   go (text txt) = text txt
   go (attr k v) = attr k v
   go (style k v) = style k v

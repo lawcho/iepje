@@ -11,7 +11,9 @@ open import Agda.Builtin.String
 open import Agda.Builtin.Sigma
 
 data Doc : Set where
-  tag : String → Doc → Doc
+  tag' : (tag-name : String)
+    → (DOM.Element-of tag-name .fst → Doc)
+    → Doc
   text : String → Doc
   attr : String → String → Doc -- applies to the *parent* element
   style : String → String → Doc -- applies to the *parent* element

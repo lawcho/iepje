@@ -125,9 +125,6 @@ postulate get-defaultView : Document → IO Window
 postulate createTextNode : Document → string → IO Text
 {-# COMPILE JS createTextNode = d => s => kt => kt(d.createTextNode(s)) #-}
 
-postulate createElement : Document → string → IO HTMLElement
-{-# COMPILE JS createElement = d => s => k => k(d.createElement(s)) #-}
-
 -- Window
 
 postulate setInterval : Window → (undefined → IO ⊤) → number → IO number
@@ -160,6 +157,14 @@ postulate key : KeyboardEvent → IO string
 --      "[object HTMLButtonElement]"
 
 -- The least precise supertypes were determined by reading the MDN docs
+
+-- Calculates the most precise sub-type of Element returned by createElement
+Element-of : string → Σ Set (_extends* HTMLElement)
+Element-of _          = HTMLElement         , it
+
+-- Create a new HTMLElement
+postulate createElement : Document → (tag-name : string) → IO (Element-of tag-name .fst)
+{-# COMPILE JS createElement = d => s => k => k(d.createElement(s)) #-}
 
 -- Calculates the most precise sub-type of Event provided to addEventListener's callback
 Event-of : string → Σ Set (_extends* Event)

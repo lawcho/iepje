@@ -3,6 +3,8 @@
 
 module Iepje.Internal.JS.Language.SubTyping where
 
+open import Agda.Builtin.Equality
+
 -- (A extends B) iff, after compilation to JavaScript,
 -- A's direct super-class is B
 postulate _extends_ : Set → Set → Set
@@ -29,3 +31,8 @@ up {{extends-cons {{p}} {{p*}}}} a = up {{p*}} (upcast {{p}} a)
 -- Misc. helper for getting a value from instance search
 it : ∀{ℓ}{A : Set ℓ} → {{A}} → A
 it {{a}} = a
+
+∘-extends* : ∀{A B C} → A extends* B → B extends* C → A extends* C
+∘-extends* extends-refl B<C = B<C
+∘-extends* (extends-cons {{A<B1}} {{B1<B}}) B<C = extends-cons {{A<B1}} {{∘-extends* B1<B B<C}}
+

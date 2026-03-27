@@ -12,6 +12,7 @@ open import Iepje.Examples.Tic-Tac-Toe
 open import Iepje.Examples.Stopwatch
 open import Iepje.Examples.Pong
 open import Iepje.Examples.Dragger
+open import Iepje.Examples.Quiz
 
 open import Iepje.Prelude using (IO;⊤)
 open import Iepje.Internal.Utils using (_>>_)
@@ -24,3 +25,4 @@ main = do
   stopwatch
   pong
   dragger
+  quiz

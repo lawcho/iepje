@@ -11,11 +11,18 @@ open import Iepje.Internal.JS.Language.IO
   using (IO)
   public
 
+module IO where
+  open import Iepje.Internal.JS.Language.IO public
+  open import Iepje.Internal.Utils using (_>>_) public
+
+module DOM where
+  open import Iepje.Internal.JS.WebAPIs.DOM public
+
 open import Iepje.Internal.Utils
   using
     (case_of_ ; if_then_else_
     ;_$_ ; _&_  ; _∘_
-    ; map ; for ; for' ; length
+    ; map ; foldr; for ; for' ; length
     ; not ; _&&_ ; _||_
     ; enumerate ; min ; max ; _/_ ; _%_
     ; _++_

@@ -68,6 +68,9 @@ postulate
   HTMLElement : Set
   instance sup-HTMLElement : HTMLElement extends Element
 
+  HTMLInputElement : Set
+  instance sup-HTMLInputElemet : HTMLInputElement extends HTMLElement
+
 ----------------------------------------------------------------
 -- Value level bindings with simple types
 ----------------------------------------------------------------
@@ -111,6 +114,9 @@ postulate replaceChildren : Element → List Node → IO undefined
 postulate get-style : HTMLElement → IO CSSStyleDeclaration
 {-# COMPILE JS get-style = e => ksd => ksd(e.style) #-}
 
+postulate get-value : HTMLInputElement → IO string
+{-# COMPILE JS get-value = e => ks => ks(e.value) #-}
+
 -- Document
 
 postulate document : IO Document  --JS global variable
@@ -139,6 +145,9 @@ postulate requestAnimationFrame : Window → (DOMHighResTimeStamp → IO ⊤) �
 
 -- Event
 
+postulate preventDefault : Event → IO ⊤
+{-# COMPILE JS preventDefault = e => kt => kt(e.preventDefault()) #-}
+
 postulate key : KeyboardEvent → IO string
 {-# COMPILE JS key = e => ks => ks(e.key) #-}
 
@@ -160,6 +169,7 @@ postulate key : KeyboardEvent → IO string
 
 -- Calculates the most precise sub-type of Element returned by createElement
 Element-of : string → Σ Set (_extends* HTMLElement)
+Element-of "input"    = HTMLInputElement    , it
 Element-of _          = HTMLElement         , it
 
 -- Create a new HTMLElement

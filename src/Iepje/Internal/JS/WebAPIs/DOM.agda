@@ -155,41 +155,40 @@ postulate key : KeyboardEvent → IO string
 -- Value level bindings with dependent types
 ----------------------------------------------------------------
 
--- These functions make a best-effort attempt at calculating
--- the most/least precise type produced/consumed by a stringly-typed
--- JavaScript function, and otherwise fall back to a safe
--- (but less useful) super/sub type
+-- The most precise sub-type of Element returned by createElement
+postulate Element-of : string → Set
+postulate instance
+  -- Catch-all case to support un-known Element types
+  sup*-Element-of : ∀{s} → Element-of s extends* HTMLElement
+  {-# OVERLAPPABLE sup*-Element-of #-}
 
--- The most precise subtypes were determined by calling `Object.prototype.tostring`, e.g.
---      Object.prototype.tostring.call(document.createElement("button"))
--- and inspecting the output, e.g.
---      "[object HTMLButtonElement]"
-
--- The least precise supertypes were determined by reading the MDN docs
-
--- Calculates the most precise sub-type of Element returned by createElement
-Element-of : string → Σ Set (_extends* HTMLElement)
-Element-of "input"    = HTMLInputElement    , it
-Element-of _          = HTMLElement         , it
+  -- Known special cases with more precise sub-types
+  -- TODO: move downstream?
+  sup*-Element-of-input : Element-of "input" extends* HTMLInputElement
 
 -- Create a new HTMLElement
-postulate createElement : Document → (tag-name : string) → IO (Element-of tag-name .fst)
+postulate createElement : Document → (tag-name : string) → IO (Element-of tag-name)
 {-# COMPILE JS createElement = d => s => k => k(d.createElement(s)) #-}
 
--- Calculates the most precise sub-type of Event provided to addEventListener's callback
-Event-of : string → Σ Set (_extends* Event)
-Event-of "click"    = PointerEvent  , it
-Event-of "keydown"  = KeyboardEvent , it
-Event-of "keyup"    = KeyboardEvent , it
-Event-of _          = Event         , it
+-- The most precise sub-type of Event provided to addEventListener's callback
+postulate Event-of : string → Set
+
+postulate instance
+  -- Catch-all case to support un-known Event types
+  sup*-Event-of : ∀{s} → Event-of s extends* Event
+  {-# OVERLAPPABLE sup*-Event-of #-}
+
+  -- Known special cases with more precise sub-types
+  -- TODO: move downstream?
+  sup*-Event-of-keydown : Event-of "keydown" extends* KeyboardEvent
+  sup*-Event-of-keyup : Event-of "keyup" extends* KeyboardEvent
 
 -- Type of raw JS event listener functions, as described in
 -- https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#the_event_listener_callback
 postulate event-listener : string → Set
--- the string parameter allows restricting types later
 
 -- Constructs an event-listener function ready for use in addEventListener and removeEventListener
-postulate mk-event-listener : ∀{s} → (Event-of s .fst → IO ⊤) → IO (event-listener s)
+postulate mk-event-listener : ∀{s} → (Event-of s → IO ⊤) → IO (event-listener s)
 {-# COMPILE JS mk-event-listener = _ => f => k => k(e => f(e)(_ => {})) #-}
 -- Passing a second argument to f runs the IO action
 -- mk-event-listener returns an IO-wrapped value to prevent over-inlining by Agda,

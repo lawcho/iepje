@@ -11,6 +11,10 @@ open import Iepje.Internal.JS.Language.IO
   using (IO)
   public
 
+open import Iepje.Internal.JS.Language.SubTyping
+  using (up; _extends*_)
+  public
+
 module IO where
   open import Iepje.Internal.JS.Language.IO public
   open import Iepje.Internal.Utils using (_>>_) public

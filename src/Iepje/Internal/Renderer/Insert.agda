@@ -21,7 +21,7 @@ open import Agda.Builtin.Sigma
 open Cursor
 
 private
-  listen : DOM.EventTarget → (n : String) → (DOM.Event-of n .fst → IO ⊤) → IO (DOM.event-listener n)
+  listen : DOM.EventTarget → (n : String) → (DOM.Event-of n → IO ⊤) → IO (DOM.event-listener n)
   listen t n k = do
     l ← DOM.mk-event-listener k
     DOM.addEventListener t n l

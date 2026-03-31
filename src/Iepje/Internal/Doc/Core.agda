@@ -12,16 +12,16 @@ open import Agda.Builtin.Sigma
 
 data Doc : Set where
   tag' : (tag-name : String)
-    → (DOM.Element-of tag-name .fst → Doc)
+    → (DOM.Element-of tag-name → Doc)
     → Doc
   text : String → Doc
   attr : String → String → Doc -- applies to the *parent* element
   style : String → String → Doc -- applies to the *parent* element
   onIO : (js-event-name : String) -- applies to the *parent* element
-    → (DOM.Event-of js-event-name .fst → IO event)
+    → (DOM.Event-of js-event-name → IO event)
     → Doc
   doc-onIO : (js-event-name : String) -- applies to the root document
-    → (DOM.Event-of js-event-name .fst → IO event)
+    → (DOM.Event-of js-event-name → IO event)
     → Doc
   append : Doc → Doc → Doc
   empty : Doc

@@ -7,6 +7,7 @@ open import Iepje.Internal.Utils hiding (_>>_)
 
 import      Iepje.Internal.JS.WebAPIs.DOM as DOM
 open import Iepje.Internal.JS.Language.IO using (IO; pure)
+open import Iepje.Internal.JS.Language.SubTyping using (up)
 
 open import Iepje.Internal.Doc.Core
 open import Agda.Builtin.String
@@ -21,14 +22,14 @@ _>>_ = append
 infixl 20 _>>_
 
 on doc-on : (js-event-name : String)
-    → (DOM.Event-of js-event-name .fst → e)
+    → (DOM.Event-of js-event-name → e)
     → Doc e
 on s h = onIO s (pure ∘ h)
 doc-on s h = doc-onIO s (pure ∘ h)
 
 on-key-down on-key-up : (String → e) → Doc e
-on-key-down decode = onIO "keydown" λ e → decode <$> DOM.key e
-on-key-up   decode = onIO "keyup"   λ e → decode <$> DOM.key e
+on-key-down decode = onIO "keydown" λ e → decode <$> DOM.key (up e)
+on-key-up   decode = onIO "keyup"   λ e → decode <$> DOM.key (up e)
 
 tag : String → Doc e → Doc e
 tag t d = tag' t λ _ → d

@@ -9,7 +9,7 @@ open import Agda.Builtin.String
 open import Agda.Builtin.Sigma
 
 data vDOM : Set where
-  tag   : (tag-name : String) → (DOM.Element-of tag-name .fst) → vDOM → vDOM
+  tag   : (tag-name : String) → (DOM.Element-of tag-name) → vDOM → vDOM
   text  : String → DOM.Text → vDOM
   attr  : String → String → vDOM
   style : String → String → vDOM

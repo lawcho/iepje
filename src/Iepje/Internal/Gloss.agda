@@ -9,6 +9,7 @@ module Iepje.Internal.Gloss where
 open import Iepje.Internal.Doc.Core
 
 import      Iepje.Internal.Runtime as Runtime
+open import Iepje.Internal.Renderer.SubtypingLemmas
 
 open import Iepje.Internal.Utils
 import      Iepje.Internal.JS.WebAPIs.DOM as DOM
@@ -51,7 +52,7 @@ playIO sel freq m0 view update step = do
   just p ← from-∪-null <$> DOM.querySelector d sel
     where nothing → pure tt
   div ← DOM.createElement d "div"
-  DOM.appendChild (up p) (up div)
+  DOM.appendChild (up p) (up {{lem2 _}} div)
   Runtime.addView rs view update (up div)
   -- Set up periodic updates, if the user requested them
   case freq of λ where

@@ -110,10 +110,10 @@ view v with Vec.all (λ ex → ex .millis-remaining == 0) v
                   transparent
                   )")
             onIO "change" λ _ → IO.do
-              s ← DOM.get-value e
+              s ← DOM.get-value (up e)
               IO.pure $ change i s
         onIO "submit" λ e → IO.do
-          DOM.preventDefault e  -- don't reload the webpage upon submission
+          DOM.preventDefault (up e)  -- don't reload the webpage upon submission
           IO.pure $ submit i
 
 update : ∀{n} → Msg n → Vec Exercise n → Vec Exercise n

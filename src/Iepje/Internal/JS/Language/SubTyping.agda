@@ -41,6 +41,15 @@ postulate up : ∀{A B : Set} → @0 {{A extends* B}} → A → B
 it : ∀{ℓ}{A : Set ℓ} → {{A}} → A
 it {{a}} = a
 
-∘-extends* : ∀{A B C} → A extends* B → B extends* C → A extends* C
-∘-extends* extends*-refl B<C = B<C
-∘-extends* (extends*-cons {{A<B1}} {{B1<B}}) B<C = extends*-cons {{A<B1}} {{∘-extends* B1<B B<C}}
+-- The type (A extends*' T) is equivalent to (A extends* T),
+-- however
+--  instance _ : (A extends*' T)
+-- guides instance search more than
+--  instance _ : (A extends* T)
+_extends*'_ : Set → Set → Set₁
+A extends*' T = ∀{B} → {{T extends* B}} → A extends* B
+{-# INLINE _extends*'_ #-}
+
+-- Recommendation:
+--  * Type instance parameters as {{A extends* B}}
+--  * Type instance return values as (A extends*' B)

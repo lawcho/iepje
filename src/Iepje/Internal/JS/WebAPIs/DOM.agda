@@ -12,7 +12,7 @@ open import Iepje.Internal.JS.Language.GlobalObjects
   hiding (null) -- clashes with the name of the type
 open import Iepje.Internal.JS.Language.Union
 open import Iepje.Internal.JS.Language.PrimitiveTypes
-open import Iepje.Internal.JS.Language.SubTyping
+open import Iepje.Internal.JS.Language.SubTyping using (_extends_; _extends*'_)
 
 open import Agda.Builtin.Sigma
 open import Agda.Builtin.List
@@ -157,14 +157,15 @@ postulate key : KeyboardEvent → IO string
 
 -- The most precise sub-type of Element returned by createElement
 postulate Element-of : string → Set
+
 postulate instance
   -- Catch-all case to support un-known Element types
-  sup*-Element-of : ∀{s} → Element-of s extends* HTMLElement
+  sup*-Element-of : ∀{s} → Element-of s extends*' HTMLElement
   {-# OVERLAPPABLE sup*-Element-of #-}
 
   -- Known special cases with more precise sub-types
   -- TODO: move downstream?
-  sup*-Element-of-input : Element-of "input" extends* HTMLInputElement
+  sup*-Element-of-input : Element-of "input" extends*' HTMLInputElement
 
 -- Create a new HTMLElement
 postulate createElement : Document → (tag-name : string) → IO (Element-of tag-name)
@@ -175,13 +176,13 @@ postulate Event-of : string → Set
 
 postulate instance
   -- Catch-all case to support un-known Event types
-  sup*-Event-of : ∀{s} → Event-of s extends* Event
+  sup*-Event-of : ∀{s} → Event-of s extends*' Event
   {-# OVERLAPPABLE sup*-Event-of #-}
 
   -- Known special cases with more precise sub-types
   -- TODO: move downstream?
-  sup*-Event-of-keydown : Event-of "keydown" extends* KeyboardEvent
-  sup*-Event-of-keyup : Event-of "keyup" extends* KeyboardEvent
+  sup*-Event-of-keydown : Event-of "keydown" extends*' KeyboardEvent
+  sup*-Event-of-keyup : Event-of "keyup" extends*' KeyboardEvent
 
 -- Type of raw JS event listener functions, as described in
 -- https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#the_event_listener_callback

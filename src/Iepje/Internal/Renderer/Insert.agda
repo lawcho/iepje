@@ -8,7 +8,6 @@ open import Agda.Builtin.Unit
 open import Iepje.Internal.Doc.Core ⊤
 open import Iepje.Internal.Renderer.vDOM
 open import Iepje.Internal.Renderer.Cursor
-open import Iepje.Internal.Renderer.SubtypingLemmas
 open import Iepje.Internal.JS.Language.IO
 open import Iepje.Internal.Utils
 
@@ -29,8 +28,8 @@ private
 
 -- Postcondition: cursor moved after the inserted nodes
 insert : Doc → Cursor → IO vDOM
-insert (text  t) c = do e ← DOM.createTextNode (c .doc) t; insert-after (up {{it}} e) c; text t e <$ pure tt
-insert (tag' t f) c = do e ← DOM.createElement (c .doc) t; insert-after (up {{lem2 t}} e) c; tag t e <$> (insert (f e) =<< init (up {{lem1 t}} e))
+insert (text  t) c = do e ← DOM.createTextNode (c .doc) t; insert-after (up e) c; text t e <$ pure tt
+insert (tag' t f) c = do e ← DOM.createElement (c .doc) t; insert-after (up e) c; tag t e <$> (insert (f e) =<< init (up e))
 insert (onIO     n k) c =     onIO n <$> listen (up (c .parent)) n k
 insert (doc-onIO n k) c = doc-onIO n <$> listen (up (c    .doc)) n k
 insert (attr  k v) _ = attr  k v <$ pure tt -- Hack: ignore attrs, always reapply in future pass

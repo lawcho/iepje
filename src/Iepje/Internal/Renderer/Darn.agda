@@ -12,7 +12,6 @@ open import Iepje.Internal.Renderer.Delete
 
 open import Iepje.Internal.Renderer.vDOM
 open import Iepje.Internal.Renderer.Cursor
-open import Iepje.Internal.Renderer.SubtypingLemmas
 
 open import Iepje.Internal.Utils
 open import Iepje.Internal.JS.Language.IO
@@ -25,11 +24,20 @@ open import Agda.Builtin.Equality
 
 postulate
   -- This could go in Agda.Builtin.String.Properties, but it is not there
-  primStringEqualitySound : ∀ s1 s2 → primStringEquality s1 s2 ≡ true → s1 ≡ s2
+  primStringEqualitySound : ∀ {s1 s2} → primStringEquality s1 s2 ≡ true → s1 ≡ s2
 
 private
   _==_ : String → String → Bool
   _==_ = primStringEquality
+
+  eq2extends* : ∀{A B} → A ≡ B → A extends* B
+  eq2extends* refl = extends*-refl
+
+  cong : ∀{ℓa ℓb} {A : Set ℓa} {B : Set ℓb} (f : A → B) {a a'} → a ≡ a' → f a ≡ f a'
+  cong _ refl = refl
+
+  lemma : ∀{t₀ t₁} → (t₀ == t₁ ≡ true) → Element-of t₀ extends* Element-of t₁
+  lemma eq = eq2extends* (cong Element-of (primStringEqualitySound eq))
 
 open Cursor
 
@@ -41,9 +49,9 @@ darn (text t₀ e   ) (text t₁     ) c with t₀ == t₁
 darn (text t₀ e   ) (text t₁     ) c | true  = do text t₀ e <$ curse (up e) c
 darn (d₀          ) (d₁          ) c | false = do delete d₀ c; insert d₁ c
 darn (tag  t₀ e d₀) (tag' t₁ f₁  ) c with t₀ == t₁ in eq
-darn (tag  t₀ e d₀) (tag' t₁ f₁  ) c | true  = do tag  t₀ e <$> (darn d₀ (f₁ (up {{lem3 t₀ t₁ (primStringEqualitySound t₀ t₁ eq)}} e))
-                                                                      =<< init (up {{lem1 t₀}} e))
-                                                                      <* curse (up {{lem2 t₀}} e) c
+darn (tag  t₀ e d₀) (tag' t₁ f₁  ) c | true  = do tag  t₀ e <$> (darn d₀ (f₁ (up {{lemma eq}} e))
+                                                                      =<< init (up e))
+                                                                      <* curse (up e) c
 darn (d₀          ) (d₁          ) c | false = do delete d₀ c; insert d₁ c
 -- Anything else? Naively delete & re-insert.
 darn d₀ d₁ c = do delete d₀ c; insert d₁ c

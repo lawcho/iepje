@@ -4,7 +4,6 @@
 module Iepje.Internal.Renderer.Style where
 
 open import Iepje.Internal.Renderer.vDOM
-open import Iepje.Internal.Renderer.SubtypingLemmas
 
 import      Iepje.Internal.JS.WebAPIs.DOM as DOM
 import      Iepje.Internal.JS.WebAPIs.CSSOM as CSSOM
@@ -24,7 +23,7 @@ open Cursor
 re-style : vDOM → Cursor → IO ⊤
 re-style (attr  k v)    c = do DOM.setAttribute (up (c .parent)) k v; pure tt
 re-style (style k v)    c = do css ← DOM.get-style (up (c .parent)); CSSOM.setProperty css k v; pure tt
-re-style (tag t e d)    c = do re-style d =<< init (up {{lem1 t}} e)
+re-style (tag t e d)    c = do re-style d =<< init (up e)
 re-style (append d₀ d₁) c = do re-style d₀ c ; re-style d₁ c
 re-style (text _ _)     c = pure tt
 re-style (onIO     _ _) c = pure tt

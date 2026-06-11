@@ -71,6 +71,18 @@ postulate
   HTMLInputElement : Set
   instance sup-HTMLInputElemet : HTMLInputElement extends HTMLElement
 
+  -- SVG
+
+  SVGElement : Set
+  instance sup-SVGElement : SVGElement extends Element
+
+  SVGGraphicsElement : Set
+  instance sup-SVGGraphicsElement : SVGGraphicsElement extends SVGElement
+
+  SVGSVGElement : Set
+  instance sup-SVGSVGElement : SVGSVGElement extends SVGGraphicsElement
+
+
 ----------------------------------------------------------------
 -- Value level bindings with simple types
 ----------------------------------------------------------------
@@ -111,11 +123,20 @@ postulate replaceChildren : Element → List Node → IO undefined
 
 -- HTMLElement
 
-postulate get-style : HTMLElement → IO CSSStyleDeclaration
-{-# COMPILE JS get-style = e => ksd => ksd(e.style) #-}
+module HTMLElement-methods where
+
+  postulate get-style : HTMLElement → IO CSSStyleDeclaration
+  {-# COMPILE JS get-style = e => ksd => ksd(e.style) #-}
 
 postulate get-value : HTMLInputElement → IO string
 {-# COMPILE JS get-value = e => ks => ks(e.value) #-}
+
+-- SVGElement
+
+module SVGElement-methods where
+
+  postulate get-style : SVGElement → IO CSSStyleDeclaration
+  {-# COMPILE JS get-style = e => ksd => ksd(e.style) #-}
 
 -- Document
 
@@ -170,6 +191,27 @@ postulate instance
 -- Create a new HTMLElement
 postulate createElement : Document → (tag-name : string) → IO (Element-of tag-name)
 {-# COMPILE JS createElement = d => s => k => k(d.createElement(s)) #-}
+
+-- The most precise sub-type of Element returned by createElementNS
+postulate ElementNS-of : string → string → Set
+
+postulate instance
+
+  -- Catch-all case to support un-known Element types
+  sup*-ElementNS-of : ∀{ns s} → ElementNS-of ns s extends*' Element
+  {-# OVERLAPPABLE sup*-ElementNS-of #-}
+
+  -- MDN docs: "The createElement() method is simpler if you want to create a plain HTML element."
+  sup*-ElementNS-of-html : ∀{s} → ElementNS-of "http://www.w3.org/1999/xhtml" s extends*' Element-of s
+
+  -- Known special cases with more precise sub-types
+  -- (determined by calling `createElementNS(ns,s).constructor.name`)
+  -- TODO: move downstream?
+  sup*-ElementNS-of-svg-svg : ∀{s} → ElementNS-of "http://www.w3.org/2000/svg" s extends*' SVGElement
+
+-- Create a new Element
+postulate createElementNS : Document → (namespace : string) (tag-name : string) → IO (ElementNS-of namespace tag-name)
+{-# COMPILE JS createElementNS = d => ns => s => k => k(d.createElementNS(ns, s)) #-}
 
 -- The most precise sub-type of Event provided to addEventListener's callback
 postulate Event-of : string → Set

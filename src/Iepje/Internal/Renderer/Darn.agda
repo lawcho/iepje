@@ -30,28 +30,30 @@ private
   _==_ : String → String → Bool
   _==_ = primStringEquality
 
-  eq2extends* : ∀{A B} → A ≡ B → A extends* B
-  eq2extends* refl = extends*-refl
+  lem' : ∀{ns₀ ns₁ t₀ t₁}
+      → ns₀ ≡ ns₁
+      → t₀ ≡ t₁
+      → (ElementNS-of ns₁ t₁ → Doc' ns₁) → ElementNS-of ns₀ t₀ → Doc' ns₀
+  lem' refl refl z = z
 
-  cong : ∀{ℓa ℓb} {A : Set ℓa} {B : Set ℓb} (f : A → B) {a a'} → a ≡ a' → f a ≡ f a'
-  cong _ refl = refl
-
-  lemma : ∀{t₀ t₁} → (t₀ == t₁ ≡ true) → Element-of t₀ extends* Element-of t₁
-  lemma eq = eq2extends* (cong Element-of (primStringEqualitySound eq))
+  lem : ∀{ns₀ ns₁ t₀ t₁}
+      → ns₀ == ns₁ ≡ true
+      → t₀ == t₁ ≡ true
+      → (ElementNS-of ns₁ t₁ → Doc' ns₁) → ElementNS-of ns₀ t₀ → Doc' ns₀
+  lem x y = lem' (primStringEqualitySound x) (primStringEqualitySound y)
 
 open Cursor
 
 -- Precondition: cursor at beginning of rendered vDOM
-darn : vDOM → Doc → Cursor → IO vDOM
+darn : ∀{ns t} → vDOM ns → Doc' ns → Cursor ns t → IO (vDOM ns)
 -- These cases may contain focus to preserve
 darn (append l₀ r₀) (append l₁ r₁) c = append <$> darn l₀ l₁ c <*> darn r₀ r₁ c
 darn (text t₀ e   ) (text t₁     ) c with t₀ == t₁
 darn (text t₀ e   ) (text t₁     ) c | true  = do text t₀ e <$ curse (up e) c
 darn (d₀          ) (d₁          ) c | false = do delete d₀ c; insert d₁ c
-darn (tag  t₀ e d₀) (tag' t₁ f₁  ) c with t₀ == t₁ in eq
-darn (tag  t₀ e d₀) (tag' t₁ f₁  ) c | true  = do tag  t₀ e <$> (darn d₀ (f₁ (up {{lemma eq}} e))
-                                                                      =<< init (up e))
-                                                                      <* curse (up e) c
-darn (d₀          ) (d₁          ) c | false = do delete d₀ c; insert d₁ c
+darn (tag ns₀ t₀ e d₀) (ns-tag' ns₁ t₁ f₁  ) c with ns₀ == ns₁ in eqₙₛ | t₀ == t₁ in eqₜ
+darn (tag ns₀ t₀ e d₀) (ns-tag' ns₁ t₁ f₁  ) c | true | true = do
+  tag  ns₀ t₀ e <$> (darn d₀ (lem eqₙₛ eqₜ f₁ e) =<< init e) <* curse (up e) c
+darn (d₀          ) (d₁          ) c | _ | _ = do delete d₀ c; insert d₁ c
 -- Anything else? Naively delete & re-insert.
 darn d₀ d₁ c = do delete d₀ c; insert d₁ c

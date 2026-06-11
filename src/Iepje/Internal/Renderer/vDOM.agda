@@ -4,16 +4,17 @@
 module Iepje.Internal.Renderer.vDOM where
 
 import      Iepje.Internal.JS.WebAPIs.DOM as DOM
+open import Iepje.Internal.Doc.Has-style
 
 open import Agda.Builtin.String
 open import Agda.Builtin.Sigma
 
-data vDOM : Set where
-  tag   : (tag-name : String) → (DOM.Element-of tag-name) → vDOM → vDOM
-  text  : String → DOM.Text → vDOM
-  attr  : String → String → vDOM
-  style : String → String → vDOM
-  onIO     : (n : String) → DOM.event-listener n → vDOM
-  doc-onIO : (n : String) → DOM.event-listener n → vDOM
-  append : vDOM → vDOM → vDOM
-  empty : vDOM
+data vDOM (ns : String) : Set where
+  tag   : (ns' tag-name : String) → (DOM.ElementNS-of ns' tag-name) → vDOM ns' → vDOM ns
+  text  : String → DOM.Text → vDOM ns
+  attr  : String → String → vDOM ns
+  style : {{Has-style ns}} → String → String → vDOM ns
+  onIO     : (n : String) → DOM.event-listener n → vDOM ns
+  doc-onIO : (n : String) → DOM.event-listener n → vDOM ns
+  append : vDOM ns → vDOM ns → vDOM ns
+  empty : vDOM ns

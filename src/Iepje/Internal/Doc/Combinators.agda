@@ -10,6 +10,7 @@ open import Iepje.Internal.JS.Language.IO using (IO; pure)
 open import Iepje.Internal.JS.Language.SubTyping using (up)
 
 open import Iepje.Internal.Doc.Core
+open import Iepje.Internal.Doc.Has-style
 open import Agda.Builtin.String
 open import Agda.Builtin.List
 open import Agda.Builtin.Sigma
@@ -17,22 +18,31 @@ open import Agda.Builtin.Bool
 
 private variable e a b : Set
 
-_>>_ : Doc e → Doc e → Doc e
+_>>_ : ∀{ns} → Doc' e ns → Doc' e ns → Doc' e ns
 _>>_ = append
 infixl 20 _>>_
 
-on doc-on : (js-event-name : String)
+on doc-on : ∀{ns} → (js-event-name : String)
     → (DOM.Event-of js-event-name → e)
-    → Doc e
+    → Doc' e ns
 on s h = onIO s (pure ∘ h)
 doc-on s h = doc-onIO s (pure ∘ h)
 
-on-key-down on-key-up : (String → e) → Doc e
+on-key-down on-key-up : ∀{ns} → (String → e) → Doc' e ns
 on-key-down decode = onIO "keydown" λ e → decode <$> DOM.key (up e)
 on-key-up   decode = onIO "keyup"   λ e → decode <$> DOM.key (up e)
 
-tag : String → Doc e → Doc e
-tag t d = tag' t λ _ → d
+-- Same namespace, passes element
+tag' : ∀{ns} t → (DOM.ElementNS-of ns t → Doc' e ns) → Doc' e ns
+tag' t d = ns-tag' _ t d
+
+-- Changes namespace, no access to element
+ns-tag : ∀{ns} ns' → String → Doc'  e ns' → Doc' e ns
+ns-tag ns t d = ns-tag' ns t λ _ → d
+
+-- Same namespace, no access to element
+tag : ∀{ns} → String → Doc' e ns → Doc' e ns
+tag t d = ns-tag _ t d
 
 div : Doc e → Doc e
 div = tag "div"
@@ -69,11 +79,14 @@ col inner = div do
 br : Doc e
 br = tag "br" empty
 
+svg : Svg e → Doc e
+svg s = ns-tag _ "svg" s
+
 -- Change the event type of a Doc
-mapDocIO : ∀{a b} → (a → IO b) → Doc a → Doc b
-mapDocIO {a} {b} f = go where
-  go : Doc a → Doc b
-  go (tag' t f) = tag' t λ e → (go (f e))
+mapDocIO : ∀{ns a b} → (a → IO b) → Doc' a ns → Doc' b ns
+mapDocIO {ns} {a} {b} f = go where
+  go : ∀{ns} → Doc' a ns → Doc' b ns
+  go (ns-tag' ns t f) = ns-tag' ns t λ e → (go (f e))
   go (text txt) = text txt
   go (attr k v) = attr k v
   go (style k v) = style k v

@@ -27,9 +27,9 @@ private
     pure l
 
 -- Postcondition: cursor moved after the inserted nodes
-insert : Doc → Cursor → IO vDOM
+insert : ∀{ns t} → Doc' ns → Cursor ns t → IO (vDOM ns)
 insert (text  t) c = do e ← DOM.createTextNode (c .doc) t; insert-after (up e) c; text t e <$ pure tt
-insert (tag' t f) c = do e ← DOM.createElement (c .doc) t; insert-after (up e) c; tag t e <$> (insert (f e) =<< init (up e))
+insert (ns-tag' ns t f) c = do e ← DOM.createElementNS (c .doc) ns t; insert-after (up e) c; tag ns t e <$> (insert (f e) =<< init e)
 insert (onIO     n k) c =     onIO n <$> listen (up (c .parent)) n k
 insert (doc-onIO n k) c = doc-onIO n <$> listen (up (c    .doc)) n k
 insert (attr  k v) _ = attr  k v <$ pure tt -- Hack: ignore attrs, always reapply in future pass

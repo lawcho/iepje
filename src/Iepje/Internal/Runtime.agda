@@ -63,11 +63,11 @@ apply-update-and-schedule-refresh rs update = do
 -- Add a view to a Runtime-Store, under an existing Element
 -- The view is re-rendered incrementally each update
 addView
-  : ∀{model event}
+  : ∀{model event t}
   → Runtime-Store model
   → (model → IO (Doc event))
   → (event → model → IO model)
-  → DOM.HTMLElement
+  → DOM.ElementNS-of "http://www.w3.org/1999/xhtml" t
   → IO ⊤
 addView rs view update parent = do
   -- Delete all children of the element, to ensure the vDOM matches

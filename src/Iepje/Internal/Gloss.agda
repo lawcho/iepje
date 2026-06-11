@@ -50,9 +50,9 @@ playIO sel freq m0 view update step = do
   -- Add the view
   just p ← from-∪-null <$> DOM.querySelector d sel
     where nothing → pure tt
-  div ← DOM.createElement d "div"
+  div ← DOM.createElementNS d "http://www.w3.org/1999/xhtml" "div"
   DOM.appendChild (up p) (up div)
-  Runtime.addView rs view update (up div)
+  Runtime.addView rs view update div
   -- Set up periodic updates, if the user requested them
   case freq of λ where
     zero         → pure tt

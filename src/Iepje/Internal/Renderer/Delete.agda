@@ -8,6 +8,7 @@ open import Iepje.Internal.Renderer.vDOM
 
 import      Iepje.Internal.JS.WebAPIs.DOM as DOM
 import      Iepje.Internal.JS.WebAPIs.CSSOM as CSSOM
+open import Iepje.Internal.Doc.Has-style
 
 open import Iepje.Internal.JS.Language.SubTyping
 open import Iepje.Internal.JS.Language.IO
@@ -19,16 +20,17 @@ open import Agda.Builtin.Unit
 open import Agda.Builtin.Maybe
 open import Agda.Builtin.Sigma
 
+open Has-style {{...}}
 open Cursor
 
 -- Precondition: cursor has correct parent
 -- Postcondition: cursor unmoved
-delete : vDOM → Cursor → IO ⊤
+delete : ∀{ns t} → vDOM ns → Cursor ns t → IO ⊤
 delete (text   t e  ) c = void $ do DOM.removeChild (up (c .parent)) (up e)
-delete (tag    t e d) c = void $ do DOM.removeChild (up (c .parent)) (up e); delete d =<< init (up e)
+delete (tag ns t e d) c = void $ do DOM.removeChild (up (c .parent)) (up e); delete d =<< init e
 delete (onIO     n k) c = void $ do DOM.removeEventListener (up (c .parent)) n k
 delete (doc-onIO n k) c = void $ do DOM.removeEventListener (up (c    .doc)) n k
 delete (attr  k v)    c = void $ do DOM.removeAttribute (up (c .parent)) k
-delete (style k v)    c = void $ do sd ← DOM.get-style (up (c .parent)); CSSOM.removeProperty sd k
+delete (style k v)    c = void $ do sd ← get-style (c .parent); CSSOM.removeProperty sd k
 delete empty          _ = void $ pure tt
 delete (append d₀ d₁) c = void $ do delete d₀ c; delete d₁ c

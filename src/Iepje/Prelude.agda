@@ -7,6 +7,10 @@ open import Iepje.Internal.Gloss            public
 open import Iepje.Internal.Doc.Core         public
 open import Iepje.Internal.Doc.Combinators  public
 
+open import Iepje.Internal.Doc.Has-style
+    using (module Instances)
+    public
+
 open import Iepje.Internal.JS.Language.IO
   using (IO)
   public

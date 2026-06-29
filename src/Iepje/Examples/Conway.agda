@@ -55,6 +55,7 @@ module IntLib where
 open BitVectorLib
 open IntLib
 
+-- width = 70; height = 70 -- "Too much recursion"
 -- width = 60; height = 60 -- "Too much recursion"
 -- width = 50; height = 50 -- Severe lag
 -- width = 40; height = 40

@@ -1,13 +1,11 @@
 
--- 'Velocity verlet' simulation
+-- 1-body physiscs simulation
 
--- as inspired by https://d3js.org/d3-force,
--- and documented by
--- https://en.wikipedia.org/wiki/Leapfrog_integration
+-- Demonstrates Iepje's support for heavy indirection, and multi-file application
 
--- Tests Iepje's support for heavy indirection, and multi-file application
+-- Also demonstrates simple usage of the Verlet integrator libary
 
-module Iepje.Examples.Verlet.App where
+module Iepje.Examples.Verlet.Examples.One-Body where
 
 open import Iepje.Examples.Verlet.Numeric.All
 
@@ -60,7 +58,7 @@ s0 .sound = refl
 fps = 10
 max-Δt = 0.3   -- If animation lags more than this, pause the simulation
 
-max-trail-segments = 400
+max-trail-segments = 100
 comet-radius = 5
 trail-radius = 1
 sun-radius = 50
@@ -100,8 +98,8 @@ view (s ∷ ss) = do
   disc comet-radius (s .x)
     "gray"
 
-verlet : IO ⊤
-verlet = play "#verlet-app"
+one-body : IO ⊤
+one-body = play "#verlet-one-body-app"
   fps
   (s0 ∷ [])
   view

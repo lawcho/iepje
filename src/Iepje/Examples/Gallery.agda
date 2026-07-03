@@ -14,7 +14,8 @@ open import Iepje.Examples.Pong
 open import Iepje.Examples.Dragger
 open import Iepje.Examples.Quiz
 open import Iepje.Examples.Conway
-open import Iepje.Examples.Verlet.App
+open import Iepje.Examples.Verlet.Examples.One-Body
+open import Iepje.Examples.Verlet.Examples.FDGL
 
 open import Iepje.Prelude using (IO;⊤)
 open import Iepje.Internal.Utils using (_>>_)
@@ -29,4 +30,5 @@ main = do
   dragger
   quiz
   conway
-  verlet
+  one-body
+  fdgl

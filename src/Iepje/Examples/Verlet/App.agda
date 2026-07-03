@@ -9,9 +9,7 @@
 
 module Iepje.Examples.Verlet.App where
 
-open import Iepje.Examples.Verlet.Numeric.Types
-open import Iepje.Examples.Verlet.Numeric.Classes
-open import Iepje.Examples.Verlet.Numeric.Instances
+open import Iepje.Examples.Verlet.Numeric.All
 
 open import Iepje.Examples.Verlet.Integrator
 

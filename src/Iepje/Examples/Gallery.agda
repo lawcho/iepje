@@ -16,13 +16,15 @@ open import Iepje.Examples.Quiz
 open import Iepje.Examples.Conway
 open import Iepje.Examples.Verlet.Examples.One-Body
 open import Iepje.Examples.Verlet.Examples.FDGL
+open import Iepje.Examples.Metaballs
+open import Iepje.Examples.MathML
 
 open import Iepje.Prelude using (IO;⊤)
 open import Iepje.Internal.Utils using (_>>_)
 
 main : IO ⊤
 main = do
-  hello
+  hello 
   counter
   tic-tac-toe
   stopwatch
@@ -32,3 +34,5 @@ main = do
   conway
   one-body
   fdgl
+  metaballs
+  mathml

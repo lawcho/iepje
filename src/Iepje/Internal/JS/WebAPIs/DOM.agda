@@ -52,6 +52,9 @@ postulate
   MouseEvent : Set
   instance sup-MouseEvent : MouseEvent extends UIEvent
 
+  WheelEvent : Set
+  instance sup-WheelEvent : WheelEvent extends MouseEvent
+
   PointerEvent : Set
   instance sup-PointerEvent : PointerEvent extends MouseEvent
 
@@ -137,6 +140,23 @@ module SVGElement-methods where
 
   postulate get-style : SVGElement → IO CSSStyleDeclaration
   {-# COMPILE JS get-style = e => ksd => ksd(e.style) #-}
+
+-- MouseEvent
+
+postulate get-offsetX : MouseEvent → IO number
+{-# COMPILE JS get-offsetX = e => kd => kd(e.offsetX) #-}
+
+postulate get-offsetY : MouseEvent → IO number
+{-# COMPILE JS get-offsetY = e => kd => kd(e.offsetY) #-}
+
+postulate get-deltaX : WheelEvent → IO number
+{-# COMPILE JS get-deltaX = e => kd => kd(e.deltaX) #-}
+
+postulate get-deltaY : WheelEvent → IO number
+{-# COMPILE JS get-deltaY = e => kd => kd(e.deltaY) #-}
+
+postulate get-deltaZ : WheelEvent → IO number
+{-# COMPILE JS get-deltaZ = e => kd => kd(e.deltaX) #-}
 
 -- Document
 
@@ -225,6 +245,8 @@ postulate instance
   -- TODO: move downstream?
   sup*-Event-of-keydown : Event-of "keydown" extends*' KeyboardEvent
   sup*-Event-of-keyup : Event-of "keyup" extends*' KeyboardEvent
+  sup*-Event-of-mousemove : Event-of "mousemove" extends*' MouseEvent
+  sup*-Event-of-wheel : Event-of "wheel" extends*' WheelEvent
 
 -- Type of raw JS event listener functions, as described in
 -- https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#the_event_listener_callback

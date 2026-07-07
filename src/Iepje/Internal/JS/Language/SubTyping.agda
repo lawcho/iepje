@@ -46,6 +46,7 @@ it {{a}} = a
 --  instance _ : (A extends*' T)
 -- guides instance search more than
 --  instance _ : (A extends* T)
+-- And (A extends*' T) is not safe to postulate directly
 _extends*'_ : Set → Set → Set₁
 A extends*' T = ∀{B} → {{T extends* B}} → A extends* B
 {-# INLINE _extends*'_ #-}

@@ -199,14 +199,16 @@ postulate key : KeyboardEvent → IO string
 -- The most precise sub-type of Element returned by createElement
 postulate Element-of : string → Set
 
-postulate instance
+instance
   -- Catch-all case to support un-known Element types
   sup*-Element-of : ∀{s} → Element-of s extends*' HTMLElement
+  sup*-Element-of = I where postulate I : _
   {-# OVERLAPPABLE sup*-Element-of #-}
 
   -- Known special cases with more precise sub-types
   -- TODO: move downstream?
   sup*-Element-of-input : Element-of "input" extends*' HTMLInputElement
+  sup*-Element-of-input = I where postulate I : _
 
 -- Create a new HTMLElement
 postulate createElement : Document → (tag-name : string) → IO (Element-of tag-name)
@@ -215,19 +217,22 @@ postulate createElement : Document → (tag-name : string) → IO (Element-of ta
 -- The most precise sub-type of Element returned by createElementNS
 postulate ElementNS-of : string → string → Set
 
-postulate instance
+instance
 
   -- Catch-all case to support un-known Element types
   sup*-ElementNS-of : ∀{ns s} → ElementNS-of ns s extends*' Element
+  sup*-ElementNS-of = I where postulate I : _
   {-# OVERLAPPABLE sup*-ElementNS-of #-}
 
   -- MDN docs: "The createElement() method is simpler if you want to create a plain HTML element."
   sup*-ElementNS-of-html : ∀{s} → ElementNS-of "http://www.w3.org/1999/xhtml" s extends*' Element-of s
+  sup*-ElementNS-of-html = I where postulate I : _
 
   -- Known special cases with more precise sub-types
   -- (determined by calling `createElementNS(ns,s).constructor.name`)
   -- TODO: move downstream?
   sup*-ElementNS-of-svg-svg : ∀{s} → ElementNS-of "http://www.w3.org/2000/svg" s extends*' SVGElement
+  sup*-ElementNS-of-svg-svg = I where postulate I : _
 
 -- Create a new Element
 postulate createElementNS : Document → (namespace : string) (tag-name : string) → IO (ElementNS-of namespace tag-name)
@@ -236,17 +241,23 @@ postulate createElementNS : Document → (namespace : string) (tag-name : string
 -- The most precise sub-type of Event provided to addEventListener's callback
 postulate Event-of : string → Set
 
-postulate instance
+instance
   -- Catch-all case to support un-known Event types
   sup*-Event-of : ∀{s} → Event-of s extends*' Event
+  sup*-Event-of = I where postulate I : _
   {-# OVERLAPPABLE sup*-Event-of #-}
 
   -- Known special cases with more precise sub-types
   -- TODO: move downstream?
+  
   sup*-Event-of-keydown : Event-of "keydown" extends*' KeyboardEvent
+  sup*-Event-of-keydown = I where postulate I : _
   sup*-Event-of-keyup : Event-of "keyup" extends*' KeyboardEvent
+  sup*-Event-of-keyup = I where postulate I : _
   sup*-Event-of-mousemove : Event-of "mousemove" extends*' MouseEvent
+  sup*-Event-of-mousemove = I where postulate I : _
   sup*-Event-of-wheel : Event-of "wheel" extends*' WheelEvent
+  sup*-Event-of-wheel = I where postulate I : _
 
 -- Type of raw JS event listener functions, as described in
 -- https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#the_event_listener_callback

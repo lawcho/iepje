@@ -86,6 +86,10 @@ postulate
   instance sup-SVGSVGElement : SVGSVGElement extends SVGGraphicsElement
 
 
+  DOMRectReadOnly : Set   -- no documented superclass
+  DOMRect : Set
+  instance sup-DOMRect : DOMRect extends DOMRectReadOnly
+
 ----------------------------------------------------------------
 -- Value level bindings with simple types
 ----------------------------------------------------------------
@@ -124,6 +128,9 @@ postulate replaceChildren : Element → List Node → IO undefined
 {-# COMPILE JS replaceChildren = el => ns => kt => kt(el.replaceChildren(...(ns))) #-}
 -- Works because Agda List s compile to JS arrays
 
+postulate getBoundingClientRect : Element → IO DOMRect
+{-# COMPILE JS getBoundingClientRect = el => kdr => kdr(el.getBoundingClientRect()) #-}
+
 -- HTMLElement
 
 module HTMLElement-methods where
@@ -148,6 +155,12 @@ postulate get-offsetX : MouseEvent → IO number
 
 postulate get-offsetY : MouseEvent → IO number
 {-# COMPILE JS get-offsetY = e => kd => kd(e.offsetY) #-}
+
+postulate get-clientX : MouseEvent → IO number
+{-# COMPILE JS get-clientX = e => kd => kd(e.clientX) #-}
+
+postulate get-clientY : MouseEvent → IO number
+{-# COMPILE JS get-clientY = e => kd => kd(e.clientY) #-}
 
 postulate get-deltaX : WheelEvent → IO number
 {-# COMPILE JS get-deltaX = e => kd => kd(e.deltaX) #-}
@@ -191,6 +204,26 @@ postulate preventDefault : Event → IO ⊤
 
 postulate key : KeyboardEvent → IO string
 {-# COMPILE JS key = e => ks => ks(e.key) #-}
+
+-- DOMRect
+
+module DOMRect-methods where
+  postulate get-top : DOMRect → IO number
+  {-# COMPILE JS get-top = dr => kn => kn(dr.top) #-}
+  postulate get-right : DOMRect → IO number
+  {-# COMPILE JS get-right = dr => kn => kn(dr.right) #-}
+  postulate get-bottom : DOMRect → IO number
+  {-# COMPILE JS get-bottom = dr => kn => kn(dr.bottom) #-}
+  postulate get-left : DOMRect → IO number
+  {-# COMPILE JS get-left = dr => kn => kn(dr.left) #-}
+  postulate get-width : DOMRect → IO number
+  {-# COMPILE JS get-width = dr => kn => kn(dr.width) #-}
+  postulate get-height : DOMRect → IO number
+  {-# COMPILE JS get-height = dr => kn => kn(dr.height) #-}
+  postulate get-x : DOMRect → IO number
+  {-# COMPILE JS get-x = dr => kn => kn(dr.x) #-}
+  postulate get-y : DOMRect → IO number
+  {-# COMPILE JS get-y = dr => kn => kn(dr.y) #-}
 
 ----------------------------------------------------------------
 -- Value level bindings with dependent types

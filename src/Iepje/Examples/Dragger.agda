@@ -1,7 +1,9 @@
 
 -- Widget with drag-and-drop divider
 
--- Demonstrates dropzones, focus retention despite varying size
+-- Demonstrates beacons, focus retention despite varying size
+
+-- https://blog.noredink.com/post/186724971283/drag-drop-without-draggables-dropzones
 
 module Iepje.Examples.Dragger where
 
@@ -14,39 +16,36 @@ grid-box x₀ x₁ y₀ y₁ = do
   style "grid-row-start"    $ primShowNat y₀
   style "grid-row-end"      $ primShowNat y₁
 
-insertion-list : ∀ {e} → Bool → Bool → (Nat → e) → List (Doc e) → (Nat → Doc e) → Doc e
+insertion-list : ∀ {e} → Bool → Bool → (Maybe Nat → e) → List (Doc e) → (Nat → Doc e) → Doc e
 insertion-list enabled debug hover docs divider = do
     style "display" "grid"
     -- List items
     concatDocs $ for' docs λ i d → do
       div do d; grid-box 0 1 (3 * i + 2) (3 * i + 4)  -- 2 cells
-    -- Hitboxes & dividers
+    -- Dividers & hitboxes
     let l = length docs
     concatDocs $ for (enumerate (1 + l)) λ i → do
       div do  -- Divider, covers 1 cell between items
         grid-box 0 1 (3 * i + 1) (3 * i + 2)
         divider i
-      when enabled $ div do -- Hitbox, covering divider & neighbours
+      -- Hitbox, covering divider & half of each neighbouring item
+      when enabled $ tag' "div" λ el → do
         grid-box 0 1 (max 1 (3 * i + 0)) (min (3 * l + 2) (3 * i + 3))
-        style "width" "0"
-        div do
-          style "margin-left" "-100vw"  -- hack to fill screen horizontally, overflows in x
-          -- CSS anchor positioning might avoid overflow,
-          -- but is still experimantal and unsupported by firefox:
-          -- https://developer.mozilla.org/en-US/docs/Web/CSS/position-anchor#browser_compatibility
-          style "height" "100%"
-          style "width" "200vw"
-          on "mouseover" λ _ → hover i
-          style "user-select" "none"
-          style "z-index" "20"
-          style "position" "relative"
-          when debug do
-            style "opacity" "20%"
-            style "background" "green"
-            style "box-shadow" "inset 0 0 0 1px red"
+        when debug do
+          style "opacity" "20%"
+          style "background" "green"
+          style "box-shadow" "inset 0 0 0 1px red"
+        doc-onIO "mousemove" λ me → IO.do
+            my ← DOM.get-clientY (up me)
+            er ← DOM.getBoundingClientRect (up el)
+            ey-min ← DOM.DOMRect-methods.get-top er
+            ey-max ← DOM.DOMRect-methods.get-bottom er
+            let in-range = primFloatLess ey-min my && primFloatLess my ey-max
+            IO.pure (hover (if in-range then just i else nothing))
+            -- This fires l events every mouse movement. The filtering happens later, in update.
 
 data Event : Set where
-  drag-over : Nat → Event
+  drag-over : Maybe Nat → Event
   cancel-drag : Event
   lift-marker : Event
   drop-marker : Event
@@ -112,7 +111,7 @@ view m = col do
 
 
 update : Event → Model → Model
-update (drag-over x)
+update (drag-over (just x))
   r@(record  {caret-pos = just _})
   = record r {caret-pos = just x}
 update drop-marker

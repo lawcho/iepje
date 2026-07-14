@@ -5,6 +5,7 @@
 module Iepje.Internal.JS.WebAPIs.DOM where
 
 open import Iepje.Internal.JS.WebAPIs.CSSOM
+open import Iepje.Internal.JS.WebAPIs.File
 
 open import Iepje.Internal.JS.Language.IO
 open import Iepje.Internal.JS.Language.GlobalObjects
@@ -85,7 +86,6 @@ postulate
   SVGSVGElement : Set
   instance sup-SVGSVGElement : SVGSVGElement extends SVGGraphicsElement
 
-
   DOMRectReadOnly : Set   -- no documented superclass
   DOMRect : Set
   instance sup-DOMRect : DOMRect extends DOMRectReadOnly
@@ -138,8 +138,12 @@ module HTMLElement-methods where
   postulate get-style : HTMLElement → IO CSSStyleDeclaration
   {-# COMPILE JS get-style = e => ksd => ksd(e.style) #-}
 
+  postulate get-files : HTMLInputElement → IO FileList
+  {-# COMPILE JS get-files = e => ks => ks(e.files) #-}
+
 postulate get-value : HTMLInputElement → IO string
 {-# COMPILE JS get-value = e => ks => ks(e.value) #-}
+
 
 -- SVGElement
 

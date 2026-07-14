@@ -5,11 +5,10 @@
 
 -- Also demonstrates simple usage of the Verlet integrator libary
 
-module Iepje.Examples.Verlet.Examples.One-Body where
+module Iepje.Examples.One-Body where
 
-open import Iepje.Examples.Verlet.Numeric.All
-
-open import Iepje.Examples.Verlet.Integrator
+open import Iepje.Examples.Lib.Numeric.All
+open import Iepje.Examples.Lib.Verlet
 
 open import Agda.Builtin.Equality
 open import Iepje.Prelude hiding (_+_; _*_;_/_;_-_;_<_)

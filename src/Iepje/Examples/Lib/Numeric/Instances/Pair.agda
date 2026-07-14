@@ -1,10 +1,10 @@
 
 -- Instances for pairs
 
-module Iepje.Examples.Verlet.Numeric.Instances.Pair where
+module Iepje.Examples.Lib.Numeric.Instances.Pair where
 
-open import Iepje.Examples.Verlet.Numeric.Types
-open import Iepje.Examples.Verlet.Numeric.Classes
+open import Iepje.Examples.Lib.Numeric.Types
+open import Iepje.Examples.Lib.Numeric.Classes
 
 open import Agda.Builtin.String
 open import Agda.Builtin.Bool

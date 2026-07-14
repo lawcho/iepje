@@ -1,10 +1,10 @@
 
 -- Instances with only Int (or Nat) inputs
 
-module Iepje.Examples.Verlet.Numeric.Instances.Int where
+module Iepje.Examples.Lib.Numeric.Instances.Int where
 
-open import Iepje.Examples.Verlet.Numeric.Types
-open import Iepje.Examples.Verlet.Numeric.Classes
+open import Iepje.Examples.Lib.Numeric.Types
+open import Iepje.Examples.Lib.Numeric.Classes
 
 open import Agda.Builtin.Nat as Nat hiding (_+_; _-_; _*_;_<_;_==_)
 open import Agda.Builtin.Int
@@ -12,7 +12,7 @@ open import Agda.Builtin.Float
 open import Agda.Builtin.String
 open import Agda.Builtin.Bool
 
-open import Iepje.Examples.Verlet.Numeric.Instances.Nat
+open import Iepje.Examples.Lib.Numeric.Instances.Nat
 
 abs : ℤ → ℕ
 abs (pos n) = n

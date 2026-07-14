@@ -1,10 +1,10 @@
 
 -- Instances with only Nat inputs
 
-module Iepje.Examples.Verlet.Numeric.Instances.Nat where
+module Iepje.Examples.Lib.Numeric.Instances.Nat where
 
-open import Iepje.Examples.Verlet.Numeric.Types
-open import Iepje.Examples.Verlet.Numeric.Classes
+open import Iepje.Examples.Lib.Numeric.Types
+open import Iepje.Examples.Lib.Numeric.Classes
 
 open import Agda.Builtin.Nat as Nat hiding (_+_; _-_; _*_;_<_;_==_)
 open import Agda.Builtin.Int

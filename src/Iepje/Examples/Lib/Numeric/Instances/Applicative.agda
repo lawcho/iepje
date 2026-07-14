@@ -1,9 +1,9 @@
 
 -- Instances for arbitrary applicatives
 
-module Iepje.Examples.Verlet.Numeric.Instances.Applicative where
+module Iepje.Examples.Lib.Numeric.Instances.Applicative where
 
-open import Iepje.Examples.Verlet.Numeric.Classes
+open import Iepje.Examples.Lib.Numeric.Classes
 
 module Applicative-Instances (f : Set → Set) {{_ : ∀{a} → Has-pure a (f a)}} {{_ : ∀{a b} → Has-<*> (f (a → b)) (f a) (f b)}} where
 

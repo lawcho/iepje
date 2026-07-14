@@ -3,10 +3,10 @@
 
 -- inspired by https://d3js.org/d3-force
 
-module Iepje.Examples.Verlet.Examples.FDGL where
+module Iepje.Examples.FDGL where
 
-open import Iepje.Examples.Verlet.Integrator
-open import Iepje.Examples.Verlet.Numeric.All
+open import Iepje.Examples.Lib.Verlet
+open import Iepje.Examples.Lib.Numeric.All
 
 open import Iepje.Prelude as P hiding (_+_; _*_;_/_;_-_;_<_;_==_; enumerate)
 

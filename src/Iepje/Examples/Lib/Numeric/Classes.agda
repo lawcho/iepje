@@ -1,5 +1,5 @@
 
-module Iepje.Examples.Verlet.Numeric.Classes where
+module Iepje.Examples.Lib.Numeric.Classes where
 
 record Has-+ (A B C : Set) : Set where
   constructor mk-+

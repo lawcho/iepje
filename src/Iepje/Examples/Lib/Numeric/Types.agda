@@ -1,5 +1,5 @@
 
-module Iepje.Examples.Verlet.Numeric.Types where
+module Iepje.Examples.Lib.Numeric.Types where
 
 open import Agda.Builtin.Nat
 open import Agda.Builtin.Int

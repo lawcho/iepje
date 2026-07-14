@@ -2,9 +2,9 @@
 -- Definitions for performing a single step of verlet integration
 -- as documented at 
 -- https://en.wikipedia.org/wiki/Leapfrog_integration
-module Iepje.Examples.Verlet.Integrator where
+module Iepje.Examples.Lib.Verlet where
 
-open import Iepje.Examples.Verlet.Numeric.Classes
+open import Iepje.Examples.Lib.Numeric.Classes
 open import Agda.Builtin.Equality
 
 record VerletConfig : Set₁ where

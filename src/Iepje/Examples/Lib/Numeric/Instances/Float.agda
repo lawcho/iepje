@@ -1,10 +1,10 @@
 
 -- Instances with Float inputs
 
-module Iepje.Examples.Verlet.Numeric.Instances.Float where
+module Iepje.Examples.Lib.Numeric.Instances.Float where
 
-open import Iepje.Examples.Verlet.Numeric.Types
-open import Iepje.Examples.Verlet.Numeric.Classes
+open import Iepje.Examples.Lib.Numeric.Types
+open import Iepje.Examples.Lib.Numeric.Classes
 
 open import Agda.Builtin.Nat as Nat hiding (_+_; _-_; _*_;_<_)
 open import Agda.Builtin.Int
@@ -13,8 +13,8 @@ open import Agda.Builtin.String
 open import Agda.Builtin.Bool
 open import Agda.Builtin.Maybe
 
-open import Iepje.Examples.Verlet.Numeric.Instances.Nat
-open import Iepje.Examples.Verlet.Numeric.Instances.Int
+open import Iepje.Examples.Lib.Numeric.Instances.Nat
+open import Iepje.Examples.Lib.Numeric.Instances.Int
 
 r-𝔽ℤ : 𝔽 → ℤ
 r-𝔽ℤ f with primFloatRound f

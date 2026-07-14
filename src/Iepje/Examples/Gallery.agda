@@ -14,8 +14,8 @@ open import Iepje.Examples.Pong
 open import Iepje.Examples.Dragger
 open import Iepje.Examples.Quiz
 open import Iepje.Examples.Conway
-open import Iepje.Examples.Verlet.Examples.One-Body
-open import Iepje.Examples.Verlet.Examples.FDGL
+open import Iepje.Examples.One-Body
+open import Iepje.Examples.FDGL
 open import Iepje.Examples.Metaballs
 open import Iepje.Examples.MathML
 

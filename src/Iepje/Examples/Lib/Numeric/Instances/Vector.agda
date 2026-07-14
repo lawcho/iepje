@@ -1,12 +1,12 @@
 
 -- Instances for vectors
 
-module Iepje.Examples.Verlet.Numeric.Instances.Vector where
+module Iepje.Examples.Lib.Numeric.Instances.Vector where
 
-open import Iepje.Examples.Verlet.Numeric.Types
-open import Iepje.Examples.Verlet.Numeric.Classes
-open import Iepje.Examples.Verlet.Numeric.Instances.Applicative
-open import Iepje.Examples.Verlet.Numeric.Instances.Fin
+open import Iepje.Examples.Lib.Numeric.Types
+open import Iepje.Examples.Lib.Numeric.Classes
+open import Iepje.Examples.Lib.Numeric.Instances.Applicative
+open import Iepje.Examples.Lib.Numeric.Instances.Fin
 
 open import Agda.Builtin.Nat as Nat using (Nat; zero; suc)
 open import Agda.Builtin.Equality

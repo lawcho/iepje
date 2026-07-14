@@ -1,10 +1,10 @@
 
 -- Instances with only Int (or Nat) inputs
 
-module Iepje.Examples.Verlet.Numeric.Instances.Fin where
+module Iepje.Examples.Lib.Numeric.Instances.Fin where
 
-open import Iepje.Examples.Verlet.Numeric.Types
-open import Iepje.Examples.Verlet.Numeric.Classes
+open import Iepje.Examples.Lib.Numeric.Types
+open import Iepje.Examples.Lib.Numeric.Classes
 
 open import Agda.Builtin.Bool
 open import Agda.Builtin.List

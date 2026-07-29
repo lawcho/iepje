@@ -30,6 +30,7 @@ re-style (tag ns t e d) c = do re-style d =<< init e
 re-style (append d₀ d₁) c = do re-style d₀ c ; re-style d₁ c
 re-style (with-parent d) c = do re-style d c
 re-style (with-document d) c = do re-style d c
-re-style (text _ _)     c = pure tt
-re-style (onIO   _ _ _) c = pure tt
-re-style empty          c = pure tt
+re-style (with-submit-event d) c = do re-style d c
+re-style (text _ _)    c = pure tt
+re-style (on''' _ _ _) c = pure tt
+re-style empty         c = pure tt

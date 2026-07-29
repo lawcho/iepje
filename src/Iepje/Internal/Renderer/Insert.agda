@@ -27,12 +27,13 @@ open Cursor
 insert : ∀{ns t} → Doc' ns → Cursor ns t → IO (vDOM ns)
 insert (text  t) c = do e ← DOM.createTextNode (c .doc) t; insert-after (up e) c; text t e <$ pure tt
 insert (ns-tag' ns t f) c = do e ← DOM.createElementNS (c .doc) ns t; insert-after (up e) c; tag ns t e <$> (insert (f e) =<< init e)
-insert (onIO'  t n k) c = onIO t n <$> do
-    l ← DOM.mk-event-listener (submit-event <=< k)
+insert (on'''  t n k) c = on''' t n <$> do
+    l ← DOM.mk-event-listener k
     DOM.addEventListener t n l
     pure l
 insert (with-parent f) c = with-parent <$> insert (f (up (c .parent))) c
 insert (with-document f) c = do d ← DOM.document; with-document <$> insert (f (up d)) c
+insert (with-submit-event f) c = insert (f submit-event) c
 insert (attr  k v) _ = attr  k v <$ pure tt -- Hack: ignore attrs, always reapply in future pass
 insert (style k v) _ = style k v <$ pure tt -- Hack: ignore style, always reapply in future pass
 insert empty       _ = empty     <$ pure tt

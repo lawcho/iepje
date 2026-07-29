@@ -54,6 +54,8 @@ darn (with-parent d₀) (with-parent f₁) c =
   with-parent <$> darn d₀ (f₁ (up (c .parent))) c
 darn (with-document d₀) (with-document f₁) c =
   with-document <$> do doc ← document; darn d₀ (f₁ (up doc)) c
+darn (with-submit-event d₀) (with-submit-event f₁) c =
+  with-submit-event <$> darn d₀ (f₁ submit-event) c
 darn (append l₀ r₀) (append l₁ r₁) c = append <$> darn l₀ l₁ c <*> darn r₀ r₁ c
 darn (text t₀ e   ) (text t₁     ) c with t₀ == t₁
 darn (text t₀ e   ) (text t₁     ) c | true  = do text t₀ e <$ curse (up e) c

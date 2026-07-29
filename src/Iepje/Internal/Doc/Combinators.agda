@@ -23,20 +23,29 @@ _>>_ : ∀{ns} → Doc' e ns → Doc' e ns → Doc' e ns
 _>>_ = append
 infixl 20 _>>_
 
--- Attach pure listener to arbitrary element
+-- Attach synchronous effectful event listener to arbitrary element
+onIO' : ∀{ns e}
+  → (target : DOM.EventTarget) (js-event-name : String)
+  → (DOM.Event-of js-event-name → IO e)
+  → Doc' e ns
+onIO' tgt s l = with-submit-event λ submit-event → on''' tgt s λ e → IO.do
+  v ← l e
+  submit-event v
+
+-- Attach synchronous pure listener to arbitrary element
 on' : ∀{ns} → (target : DOM.EventTarget) (js-event-name : String)
     → (DOM.Event-of js-event-name → e)
     → Doc' e ns
 on' tgt s l = onIO' tgt s (pure ∘ l)
 
--- Attach effectful listener to parent element (or root doc.)
+-- Attach synchronous effectful listener to parent element (or root doc.)
 onIO doc-onIO : ∀{ns} → (js-event-name : String)
     → (DOM.Event-of js-event-name → IO e)
     → Doc' e ns
 onIO s l = with-parent λ p → onIO' (up p) s l
 doc-onIO s l = with-document λ d → onIO' (up d) s l
 
--- Attach pure listener to parent element (or root doc.)
+-- Attach synchronous pure listener to parent element (or root doc.)
 on doc-on : ∀{ns} → (js-event-name : String)
     → (DOM.Event-of js-event-name → e)
     → Doc' e ns
@@ -101,13 +110,15 @@ svg s = ns-tag _ "svg" s
 mapDocIO : ∀{ns a b} → (a → IO b) → Doc' a ns → Doc' b ns
 mapDocIO {ns} {a} {b} f = go where
   go : ∀{ns} → Doc' a ns → Doc' b ns
+  go (with-submit-event g) = with-submit-event λ submit-event →
+    go (g (submit-event <=< f))
   go (ns-tag' ns t f) = ns-tag' ns t λ e → (go (f e))
   go (text txt) = text txt
   go (attr k v) = attr k v
   go (style k v) = style k v
   go (with-parent g) = with-parent λ p → go (g p)
   go (with-document g) = with-document λ d → go (g d)
-  go (onIO' tgt js-event-name g) = onIO' tgt js-event-name (f <=< g)
+  go (on''' tgt js-event-name g) = on''' tgt js-event-name g
   go (append d1 d2) = append (go d1) (go d2)
   go empty = empty
 

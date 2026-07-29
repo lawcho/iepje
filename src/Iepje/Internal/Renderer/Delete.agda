@@ -28,9 +28,10 @@ open Cursor
 delete : ∀{ns t} → vDOM ns → Cursor ns t → IO ⊤
 delete (text   t e  ) c = void $ do DOM.removeChild (up (c .parent)) (up e)
 delete (tag ns t e d) c = void $ do DOM.removeChild (up (c .parent)) (up e); delete d =<< init e
-delete (onIO   t n k) c = void $ do DOM.removeEventListener t n k
+delete (on'''   t n k) c = void $ do DOM.removeEventListener t n k
 delete (with-parent d) c = void $ do delete d c
 delete (with-document d) c = void $ do delete d c
+delete (with-submit-event d) c = void $ do delete d c
 delete (attr  k v)    c = void $ do DOM.removeAttribute (up (c .parent)) k
 delete (style k v)    c = void $ do sd ← get-style (c .parent); CSSOM.removeProperty sd k
 delete empty          _ = void $ pure tt

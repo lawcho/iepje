@@ -8,6 +8,7 @@ import      Iepje.Internal.JS.WebAPIs.DOM as DOM
 open import Iepje.Internal.JS.Language.IO using (IO)
 open import Iepje.Internal.Doc.Has-style
 
+open import Agda.Builtin.Unit 
 open import Agda.Builtin.String
 open import Agda.Builtin.Sigma
 
@@ -20,8 +21,9 @@ data Doc' (ns : String) : Set where
   style : {{Has-style ns}} → String → String → Doc' ns -- applies to the *parent* element
   with-parent : (DOM.Element → Doc' ns) → Doc' ns
   with-document : (DOM.Document → Doc' ns) → Doc' ns
-  onIO' : (target : DOM.EventTarget) (js-event-name : String)
-    → (DOM.Event-of js-event-name → IO event)
+  with-submit-event : ((event → IO ⊤) → Doc' ns) → Doc' ns
+  on''' : (target : DOM.EventTarget) (js-event-name : String)
+    → (DOM.Event-of js-event-name → IO ⊤)
     → Doc' ns
   append : Doc' ns → Doc' ns → Doc' ns
   empty : Doc' ns

@@ -15,6 +15,8 @@ open import Agda.Builtin.String
 open import Agda.Builtin.List
 open import Agda.Builtin.Sigma
 open import Agda.Builtin.Bool
+open import Agda.Builtin.Maybe
+open import Agda.Builtin.Unit
 
 private variable ns : String
 private variable e a b : Set
@@ -23,14 +25,22 @@ _>>_ : ∀{ns} → Doc' e ns → Doc' e ns → Doc' e ns
 _>>_ = append
 infixl 20 _>>_
 
+-- Attach synchronous effectful filtering event listener to arbitrary element
+onIO'-Maybe : ∀{ns e}
+  → (target : DOM.EventTarget) (js-event-name : String)
+  → (DOM.Event-of js-event-name → IO (Maybe e))
+  → Doc' e ns
+onIO'-Maybe tgt s l = with-submit-event λ submit-event → on''' tgt s λ e →
+  l e IO.>>= λ where
+    (just v) → submit-event v
+    nothing → pure tt
+
 -- Attach synchronous effectful event listener to arbitrary element
 onIO' : ∀{ns e}
   → (target : DOM.EventTarget) (js-event-name : String)
   → (DOM.Event-of js-event-name → IO e)
   → Doc' e ns
-onIO' tgt s l = with-submit-event λ submit-event → on''' tgt s λ e → IO.do
-  v ← l e
-  submit-event v
+onIO' tgt s l = onIO'-Maybe tgt s λ e → just <$> l e
 
 -- Attach synchronous pure listener to arbitrary element
 on' : ∀{ns} → (target : DOM.EventTarget) (js-event-name : String)
@@ -45,6 +55,14 @@ onIO doc-onIO : ∀{ns} → (js-event-name : String)
 onIO s l = with-parent λ p → onIO' (up p) s l
 doc-onIO s l = with-document λ d → onIO' (up d) s l
 
+
+-- Attach synchronous effectful filtering listener to parent element (or root doc.)
+onIO-Maybe doc-onIO-Maybe : ∀{ns} → (js-event-name : String)
+    → (DOM.Event-of js-event-name → IO (Maybe e))
+    → Doc' e ns
+onIO-Maybe s l = with-parent λ p → onIO'-Maybe (up p) s l
+doc-onIO-Maybe s l = with-document λ d → onIO'-Maybe (up d) s l
+
 -- Attach synchronous pure listener to parent element (or root doc.)
 on doc-on : ∀{ns} → (js-event-name : String)
     → (DOM.Event-of js-event-name → e)
@@ -52,9 +70,9 @@ on doc-on : ∀{ns} → (js-event-name : String)
 on s h = onIO s (pure ∘ h)
 doc-on s h = doc-onIO s (pure ∘ h)
 
-on-key-down on-key-up : ∀{ns} → (String → e) → Doc' e ns
-on-key-down decode = onIO "keydown" λ e → decode <$> DOM.key (up e)
-on-key-up   decode = onIO "keyup"   λ e → decode <$> DOM.key (up e)
+on-key-down on-key-up : ∀{ns} → (String → Maybe e) → Doc' e ns
+on-key-down decode = onIO-Maybe "keydown" λ e → decode <$> DOM.key (up e)
+on-key-up   decode = onIO-Maybe "keyup"   λ e → decode <$> DOM.key (up e)
 
 -- Same namespace, passes element
 tag' : ∀{ns} t → (DOM.ElementNS-of ns t → Doc' e ns) → Doc' e ns

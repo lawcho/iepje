@@ -98,7 +98,7 @@ step-field f = λ where
       xmax =   field-width / 2.0
 
 data Paddle-Cmd : Set where
-  ↑| ↓| -| |- |↑ |↓ other : Paddle-Cmd
+  ↑| ↓| -| |- |↑ |↓ : Paddle-Cmd
 
 psf = primShowFloat
 
@@ -150,13 +150,13 @@ module _ where
       view-Ball (f .ball)
     view-Paddle (f .right) "right"
     on-key-down λ where
-      "d" → ↑|  ;  "j" → |↑
-      "f" → ↓|  ;  "k" → |↓
-      _ → other
+      "d" → just ↑|  ;  "j" → just |↑
+      "f" → just ↓|  ;  "k" → just |↓
+      _ → nothing
     on-key-up λ where
-      "d" → -|  ;  "j" → |-
-      "f" → -|  ;  "k" → |-
-      _ → other
+      "d" → just -|  ;  "j" → just |-
+      "f" → just -|  ;  "k" → just |-
+      _ → nothing
 
 set-y' : Float → Paddle → Paddle
 set-y' y' p = record p {y' = y'}
@@ -173,6 +173,6 @@ pong = play "#pong-game"
     |↑ f → record f {right = set-y' -5.0 (f .right)}
     |- f → record f {right = set-y'  0.0 (f .right)}
     |↓ f → record f {right = set-y'  5.0 (f .right)}
-    other f → f)
+  )
   (λ _ → step-field)
  

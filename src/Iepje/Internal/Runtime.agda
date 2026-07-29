@@ -60,6 +60,8 @@ apply-update-and-schedule-refresh rs update = do
   set (rs .current-model) m'
   schedule-refresh rs
 
+
+
 -- Add a view to a Runtime-Store, under an existing Element
 -- The view is re-rendered incrementally each update
 addView
@@ -74,22 +76,20 @@ addView rs view update parent = do
   DOM.replaceChildren (up parent) []
   -- Create a muable reference cell to track the state of this view
   rvd ← new vDOM.empty
+  -- Create a callback to consume events processed by 'on' etc.
+  let submit-event = λ e → apply-update-and-schedule-refresh rs (update e)
   -- Create a callback which renders this view when called
   let renderThisView = do
     m ← get $ rs .current-model
     doc ← view m  -- Generate the (declarative) Doc
-      -- Modify the Doc's callbacks to re-enter the runtime
-      <&> Html.mapDocIO λ e →
-        apply-update-and-schedule-refresh rs (update e)
-    
     -- Render, imperatively updating the browser's DOM.
     vd ← get rvd
-    vd' ← Renderer.darn vd doc  =<< Cursor.init parent
-    Renderer.re-style vd'       =<< Cursor.init parent
+    vd' ← Renderer.darn submit-event vd doc  =<< Cursor.init parent
+    Renderer.re-style vd'                    =<< Cursor.init parent
     -- Store the vDOM tracking the new browser DOM
     set rvd vd'
   -- Add this view's rendering callback to the store
-  -- so that updates due to other views will also refresh this view
+  -- so that updates (possibly from other views) will refresh this view
   modify (rs .on-animation-tick-hooks) (renderThisView ∷_)
   -- Render the initial view (replaces el & sets up callbacks)
   renderThisView

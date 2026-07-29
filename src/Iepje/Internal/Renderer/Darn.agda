@@ -1,20 +1,23 @@
 
 -- Function to update modified DOM in place
 
-module Iepje.Internal.Renderer.Darn where
-
+open import Iepje.Internal.JS.Language.IO
 open import Agda.Builtin.Unit
 
-open import Iepje.Internal.Doc.Core ⊤
+module Iepje.Internal.Renderer.Darn
+  {event : Set}
+  (submit-event : event → IO ⊤)
+  where
 
-open import Iepje.Internal.Renderer.Insert
+open import Iepje.Internal.Doc.Core event
+
+open import Iepje.Internal.Renderer.Insert submit-event
 open import Iepje.Internal.Renderer.Delete
 
 open import Iepje.Internal.Renderer.vDOM
 open import Iepje.Internal.Renderer.Cursor
 
 open import Iepje.Internal.Utils
-open import Iepje.Internal.JS.Language.IO
 open import Iepje.Internal.JS.Language.SubTyping
 open import Iepje.Internal.JS.WebAPIs.DOM
 

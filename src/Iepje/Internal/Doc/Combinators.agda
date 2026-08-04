@@ -16,6 +16,7 @@ open import Agda.Builtin.List
 open import Agda.Builtin.Sigma
 open import Agda.Builtin.Bool
 
+private variable ns : String
 private variable e a b : Set
 
 _>>_ : ∀{ns} → Doc' e ns → Doc' e ns → Doc' e ns
@@ -108,5 +109,5 @@ when : Bool → Doc a → Doc a
 when true a = a
 when false _ = empty 
 
-concatDocs : List (Doc a) → Doc a
+concatDocs : List (Doc' a ns) → Doc' a ns
 concatDocs = foldr _>>_ empty

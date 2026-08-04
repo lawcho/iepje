@@ -18,6 +18,7 @@ open import Iepje.Examples.One-Body
 open import Iepje.Examples.FDGL
 open import Iepje.Examples.Metaballs
 open import Iepje.Examples.MathML
+open import Iepje.Examples.Scatterplot
 
 open import Iepje.Prelude using (IO;⊤)
 open import Iepje.Internal.Utils using (_>>_)
@@ -36,3 +37,4 @@ main = do
   fdgl
   metaballs
   mathml
+  scatterplot

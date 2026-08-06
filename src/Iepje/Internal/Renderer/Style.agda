@@ -28,7 +28,8 @@ re-style (attr  k v)    c = do DOM.setAttribute (up (c .parent)) k v; pure tt
 re-style (style k v)    c = do css ← get-style (c .parent); CSSOM.setProperty css k v; pure tt
 re-style (tag ns t e d) c = do re-style d =<< init e
 re-style (append d₀ d₁) c = do re-style d₀ c ; re-style d₁ c
+re-style (with-parent d) c = do re-style d c
+re-style (with-document d) c = do re-style d c
 re-style (text _ _)     c = pure tt
-re-style (onIO     _ _) c = pure tt
-re-style (doc-onIO _ _) c = pure tt
+re-style (onIO   _ _ _) c = pure tt
 re-style empty          c = pure tt

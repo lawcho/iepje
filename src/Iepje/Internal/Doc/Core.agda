@@ -18,10 +18,9 @@ data Doc' (ns : String) : Set where
   text : String → Doc' ns
   attr : String → String → Doc' ns -- applies to the *parent* element
   style : {{Has-style ns}} → String → String → Doc' ns -- applies to the *parent* element
-  onIO : (js-event-name : String) -- applies to the *parent* element
-    → (DOM.Event-of js-event-name → IO event)
-    → Doc' ns
-  doc-onIO : (js-event-name : String) -- applies to the root document
+  with-parent : (DOM.Element → Doc' ns) → Doc' ns
+  with-document : (DOM.Document → Doc' ns) → Doc' ns
+  onIO' : (target : DOM.EventTarget) (js-event-name : String)
     → (DOM.Event-of js-event-name → IO event)
     → Doc' ns
   append : Doc' ns → Doc' ns → Doc' ns

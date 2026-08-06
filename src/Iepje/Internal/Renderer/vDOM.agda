@@ -14,7 +14,8 @@ data vDOM (ns : String) : Set where
   text  : String → DOM.Text → vDOM ns
   attr  : String → String → vDOM ns
   style : {{Has-style ns}} → String → String → vDOM ns
-  onIO     : (n : String) → DOM.event-listener n → vDOM ns
-  doc-onIO : (n : String) → DOM.event-listener n → vDOM ns
+  with-parent : vDOM ns → vDOM ns
+  with-document : vDOM ns → vDOM ns
+  onIO     : (target : DOM.EventTarget) (n : String) → DOM.event-listener n → vDOM ns
   append : vDOM ns → vDOM ns → vDOM ns
   empty : vDOM ns

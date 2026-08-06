@@ -6,7 +6,7 @@ module Iepje.Internal.Doc.Combinators where
 open import Iepje.Internal.Utils hiding (_>>_)
 
 import      Iepje.Internal.JS.WebAPIs.DOM as DOM
-open import Iepje.Internal.JS.Language.IO using (IO; pure)
+open import Iepje.Internal.JS.Language.IO as IO using (IO; pure)
 open import Iepje.Internal.JS.Language.SubTyping using (up)
 
 open import Iepje.Internal.Doc.Core
@@ -23,6 +23,20 @@ _>>_ : ∀{ns} → Doc' e ns → Doc' e ns → Doc' e ns
 _>>_ = append
 infixl 20 _>>_
 
+-- Attach pure listener to arbitrary element
+on' : ∀{ns} → (target : DOM.EventTarget) (js-event-name : String)
+    → (DOM.Event-of js-event-name → e)
+    → Doc' e ns
+on' tgt s l = onIO' tgt s (pure ∘ l)
+
+-- Attach effectful listener to parent element (or root doc.)
+onIO doc-onIO : ∀{ns} → (js-event-name : String)
+    → (DOM.Event-of js-event-name → IO e)
+    → Doc' e ns
+onIO s l = with-parent λ p → onIO' (up p) s l
+doc-onIO s l = with-document λ d → onIO' (up d) s l
+
+-- Attach pure listener to parent element (or root doc.)
 on doc-on : ∀{ns} → (js-event-name : String)
     → (DOM.Event-of js-event-name → e)
     → Doc' e ns
@@ -91,8 +105,9 @@ mapDocIO {ns} {a} {b} f = go where
   go (text txt) = text txt
   go (attr k v) = attr k v
   go (style k v) = style k v
-  go (onIO js-event-name g) = onIO js-event-name (f <=< g)
-  go (doc-onIO js-event-name g) = doc-onIO js-event-name (f <=< g)
+  go (with-parent g) = with-parent λ p → go (g p)
+  go (with-document g) = with-document λ d → go (g d)
+  go (onIO' tgt js-event-name g) = onIO' tgt js-event-name (f <=< g)
   go (append d1 d2) = append (go d1) (go d2)
   go empty = empty
 

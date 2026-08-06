@@ -7,7 +7,7 @@
 module Iepje.Examples.Scatterplot where
 
 open import Iepje.Prelude as P
-  hiding (max; min; length; map; for; fst; snd; _,_; List; _∷_; [])
+  hiding (max; min; length; map; for; fst; snd; _,_)
 open import Agda.Builtin.Equality
 open import Iepje.Internal.Doc.Core using (empty)
 open import Iepje.Internal.JS.Language.Union using (_∪_)
@@ -32,27 +32,15 @@ open ScalarOps
 
 -- Fast & safe list library
 module ListOps where
-  -- Custom type to work around agda#8639
-  data List (A : Set) : Set where
-    [] : List A
-    _∷_ : A → List A → List A
-  infixr 5 _∷_
 
-  {-# COMPILE JS List = ((x,v) => (x.length < 1) ? v["[]"]() : v["_∷_"](x[0], x.slice(1))) #-}
-  {-# COMPILE JS [] = Array() #-}
-  {-# COMPILE JS _∷_ = x => y => [x].concat(y) #-}
+  private variable A B : Set
 
-  toBuiltinList : ∀{A} → List A → P.List A
-  toBuiltinList [] = P.[]
-  toBuiltinList (x ∷ l) = x P.∷ toBuiltinList l
-  {-# COMPILE JS toBuiltinList = _ => arr => arr #-}
-
-  length : ∀{A} → List A → Nat
+  length : List A → Nat
   length [] = 0
   length (_ ∷ l) = 1 + length l
   {-# COMPILE JS length = _ => arr => BigInt (arr.length) #-}
 
-  take : ∀{A} → Nat → List A → List A
+  take : Nat → List A → List A
   take _ [] = []
   take zero _ = []
   take (suc n) (x ∷ l) = x ∷ take n l
@@ -66,17 +54,17 @@ module ListOps where
   mean : List Float → Float
   mean l = asum l /f nat (length l)
 
-  map : ∀{A B} → (A → B) → List A → List B
+  map : (A → B) → List A → List B
   map f [] = []
   map f (a ∷ as) = f a ∷ (map f as)
   {-# COMPILE JS map = _ => _ => f => arr => arr.map(f) #-}
 
-  mapi : ∀{A B} → (Nat → A → B) → List A → List B
+  mapi : (Nat → A → B) → List A → List B
   mapi {A}{B} f = go 0 where
     go : Nat → List A → List B
     go _ [] = []
     go n (x ∷ l) = f n x ∷ go (1 + n) l
-  {-# COMPILE JS mapi = _ => _=> f => arr => arr.map((x,i) => f(i)(x)) #-}
+  {-# COMPILE JS mapi = _ => _ => f => arr => arr.map((x,i) => f(i)(x)) #-}
 
   fori : ∀{A B} → List A → (Nat → A → B) → List B
   fori l f = mapi f l
@@ -153,7 +141,7 @@ view m = do
       style "grid-area" "1 / 1"
       attr "viewBox" $ "0 0 " ++ sf svg-w ++ " " ++ sf svg-h
       attr "width" (sf svg-w); attr "height" (sf svg-h)
-      concatDocs $ toBuiltinList $ fori ds λ i delay → do
+      concatDocs $ fori ds λ i delay → do
         let x = to-x i
         let y = to-y delay
         if svg-h <f y

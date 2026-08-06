@@ -20,6 +20,7 @@ open import Iepje.Examples.Metaballs
 open import Iepje.Examples.MathML
 open import Iepje.Examples.Scatterplot-Generator
 open import Iepje.Examples.Json-Viewer
+open import Iepje.Examples.Scatterplot-Viewer
 
 open import Iepje.Prelude using (IO;⊤)
 open import Iepje.Internal.Utils using (_>>_)
@@ -40,3 +41,4 @@ main = do
   mathml
   scatterplot-generator
   json-viewer
+  scatterplot-viewer

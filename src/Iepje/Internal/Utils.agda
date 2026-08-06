@@ -76,6 +76,8 @@ x & f = f x
 _∘_ : (B → C) → (A → B) → (A → C)
 (g ∘ f) x = g (f x)
 
+infixr 20 _∘_
+
 case_of_ : A → (A → B) → B
 case x of f = f x
 

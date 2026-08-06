@@ -49,6 +49,9 @@ indexed-map {A = A} {B = B} f = go 0 where
 map : (A → B) → Array A → Array B
 map f = indexed-map λ _ → f
 
+for : Array A → (A → B) → Array B
+for as f = map f as
+
 set : Nat → A → Array A → Array A
 set n a [] = []
 set zero a (_ ∷ as) = a ∷ as

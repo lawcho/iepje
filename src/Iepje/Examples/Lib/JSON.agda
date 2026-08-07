@@ -67,7 +67,7 @@ data JSON : Set where
 
 -- JSON key-value pairs
 record Entry : Set where
-  inductive; pattern
+  inductive
   constructor _:=_
   field key : String
   field value : JSON
@@ -81,7 +81,7 @@ record Entry : Set where
 
 -- JSON Objects
 record Object where
-  inductive; pattern
+  inductive
   constructor fromEntries
   field entries : List Entry
 
@@ -112,3 +112,6 @@ postulate parse : String → Maybe JSON
   }
 #-}
 
+-- JSON-printing function
+postulate stringify : JSON → String
+{-# COMPILE JS stringify = JSON.stringify #-}

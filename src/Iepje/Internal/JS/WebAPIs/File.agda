@@ -18,6 +18,11 @@ postulate
 
   FileList : Set -- no documented superclass
 
+module Blob-methods where
+
+  postulate createObjectURL : Blob → IO string
+  {-# COMPILE JS createObjectURL = b => k => k (URL.createObjectURL(b)) #-}
+
 module FileList-methods where
 
   postulate get-length : FileList → IO number

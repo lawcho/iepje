@@ -6,6 +6,8 @@ module Iepje.Examples.Lib.Array where
 open import Agda.Builtin.List
 open import Agda.Builtin.Nat
 open import Agda.Builtin.Bool
+open import Agda.Builtin.Float
+open import Iepje.Examples.Lib.Float as Float hiding (max; min)
 
 -- Agda already compiles Lists to JS arrays
 Array = List
@@ -68,3 +70,58 @@ filter f (a ∷ as) with f a
 ... | true = a ∷ filter f as
 ... | false = filter f as
 {-# COMPILE JS filter = _ => _ => f => arr => arr.filter(f) #-}
+
+length : List A → Nat
+length [] = 0
+length (_ ∷ l) = 1 + length l
+{-# COMPILE JS length = _ => _ => arr => BigInt (arr.length) #-}
+
+-- Postulated to avoid TC-time/run-time result mismatch due to FP errors
+postulate sum : List Float → Float
+-- sum [] = 0.0
+-- sum (x ∷ l) = primFloatPlus x (sum l)
+{-# COMPILE JS sum = arr => Math.sumPrecise(arr) #-}
+
+max : List Float → Float
+max [] = -Infinity
+max (x ∷ l) = Float.max x (max l)
+{-# COMPILE JS max = arr => Math.max(...arr) #-}
+
+min : List Float → Float
+min [] = +Infinity
+min (x ∷ l) = Float.min x (min l)
+{-# COMPILE JS min = arr => Math.min(...arr) #-}
+
+mean : List Float → Float
+mean l = primFloatDiv (sum l) (primNatToFloat (length l))
+
+fori : List A → (Nat → A → B) → List B
+fori l f = indexed-map f l
+
+foldl : (B → A → B) → B → Array A → B
+foldl f b [] = b
+foldl f b (a ∷ as) = foldl f (f b a) as
+{-# COMPILE JS foldl = _ => _ => _ => _ => f => b => arr =>
+  arr.reduce
+    ( (accumulator,currentValue) => f(accumulator)(currentValue)
+    , b
+    )
+#-}
+
+foldr : (A → B → B) → B → Array A → B
+foldr f b [] = b
+foldr f b (a ∷ as) = f a (foldr f b as)
+{-# COMPILE JS foldr = _ => _ => _ => _ => f => b => arr =>
+  arr.reduceRight
+    ( (accumulator,currentValue) => f(currentValue)(accumulator)
+    , b
+    )
+#-}
+
+concat : Array A → Array A → Array A
+concat [] l2 = l2
+concat (a ∷ l1) l2 = a ∷ (concat l1 l2)
+{-# COMPILE JS concat = _ => _ => arr1 => arr2 => arr1.concat(arr2) #-}
+
+snoc : List A → A → List A
+snoc l a = concat l (a ∷ [])

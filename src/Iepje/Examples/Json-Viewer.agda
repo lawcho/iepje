@@ -39,9 +39,6 @@ update malformed-filelist _ = error "Malformed file list!"
 update malformed-json _ = error "Malformed JSON!"
 update (parsed-json x) _ = got-json x
 
-pure : Event → IO (Promise Event)
-pure = IO.pure ∘ Promise.pure
-
 bold : ∀{e} → String → Html e
 bold str = span do
   style "font-weight" "bold"

@@ -1,2 +1,2 @@
 
-# Iepje-independent mini libraries used by multiple examples
+# Non-GUI mini libraries used by multiple examples

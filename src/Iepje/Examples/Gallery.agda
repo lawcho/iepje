@@ -18,7 +18,7 @@ open import Iepje.Examples.One-Body
 open import Iepje.Examples.FDGL
 open import Iepje.Examples.Metaballs
 open import Iepje.Examples.MathML
-open import Iepje.Examples.Scatterplot
+open import Iepje.Examples.Scatterplot-Generator
 open import Iepje.Examples.Json-Viewer
 
 open import Iepje.Prelude using (IO;⊤)
@@ -38,5 +38,5 @@ main = do
   fdgl
   metaballs
   mathml
-  scatterplot
+  scatterplot-generator
   json-viewer

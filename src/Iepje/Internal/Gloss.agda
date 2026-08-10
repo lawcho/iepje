@@ -17,8 +17,7 @@ open import Iepje.Internal.JS.Language.IO
 open import Iepje.Internal.JS.Language.SubTyping
 open import Iepje.Internal.JS.Language.FromUnion
 
-import Iepje.Internal.JS.Language.GlobalObjects
-  as Date using (now)
+open import Iepje.Internal.JS.Language.GlobalObjects using (module performance-methods)
 import Iepje.Internal.JS.Language.MutableReferences as Ref
 
 open import Agda.Builtin.Unit
@@ -57,12 +56,12 @@ playIO sel freq m0 view update step = do
   case freq of λ where
     zero         → pure tt
     freq@(suc _) → do
-      rt ← Ref.new =<< Date.now
+      rt ← Ref.new =<< performance-methods.now
       let periodInMillis = primNatToFloat $ 1000 / freq
       DOM.setInterval w
         (λ _ → Runtime.apply-update-and-schedule-refresh rs λ m → do
             t-prev ← Ref.get rt
-            t-now ← Date.now
+            t-now ← performance-methods.now
             Ref.set rt t-now
             let _-_ = primFloatMinus; _/_ = primFloatDiv
             let elapsedSecs = (t-now - t-prev) / 1000.0

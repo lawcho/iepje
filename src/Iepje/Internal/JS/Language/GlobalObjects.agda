@@ -17,10 +17,15 @@ postulate String Number BigInt Boolean Symbol : Set
 -- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/
 postulate Object : Set
 
--- Date
+module Date-methods where
 
-postulate now : IO number
-{-# COMPILE JS now = kn => kn(Date.now()) #-}
+  postulate now : IO number
+  {-# COMPILE JS now = kn => kn(Date.now()) #-}
+
+module performance-methods where
+
+  postulate now : IO number
+  {-# COMPILE JS now = kn => kn(performance.now()) #-}
 
 -- null
 

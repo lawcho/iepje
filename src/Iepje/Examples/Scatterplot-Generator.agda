@@ -86,7 +86,7 @@ view m = do
   tag "button" do
     attr "title" "Click to download data as JSON" 
     onIO "click" λ _ → IO.do
-      blob ← blobbify $ JSON.stringify $ floats-to-json ds
+      blob ← blobbify $ JSON.stringify $ floats-to-json $ reverse ds
       url ← Blob-methods.createObjectURL blob
       open' url
       IO.pure nop
@@ -94,10 +94,10 @@ view m = do
       attr "viewBox" $ "0 0 " ++ sf svg-w ++ " " ++ sf svg-h
       attr "width" (sf svg-w); attr "height" (sf svg-h)
       concatDocs $ fori ds λ i delay → do
-        if svg-h < to-y delay
+        if maxd < delay
           -- Show markers for datapoints that won't fit in the viewport
-          then line "pink" (to-x i) (svg-h * 0.95)
-                           (to-x i) svg-h
+          then line "pink" (to-x i) (svg-h * 0.00)
+                           (to-x i) (svg-h * 0.05)
           -- Render datapoints that do fit as circles
           else tag "circle" do
             attr "cx" $ sf $ to-x i
@@ -118,12 +118,13 @@ view m = do
     ds = delays m
     n = length ds
     rmd = mean (take window-width ds)
+    maxd = 2.0 * rmd
 
     to-y : Delay → Y
-    to-y d = svg-h * (d / (2.0 * rmd))
+    to-y d = svg-h * (1.0 - (d / maxd))
 
     to-x : Index → X
-    to-x i = svg-w * (nat i / nat n)
+    to-x i = svg-w * (1.0 - (nat i / nat n))
 
 tstep : Float → Model → Model
 tstep Δt m@record {running = true} = record m {delays = Δt ∷ m .delays}

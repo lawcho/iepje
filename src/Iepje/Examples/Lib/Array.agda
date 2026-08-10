@@ -125,3 +125,8 @@ concat (a ∷ l1) l2 = a ∷ (concat l1 l2)
 
 snoc : List A → A → List A
 snoc l a = concat l (a ∷ [])
+
+reverse : Array A → Array A
+reverse [] = []
+reverse (a ∷ as) = snoc (reverse as) a
+{-# COMPILE JS reverse = _ => _ => arr => arr.toReversed() #-}

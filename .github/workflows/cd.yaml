@@ -19,12 +19,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
-      - uses: cachix/install-nix-action@v31
-        with:
-          github_access_token: ${{ secrets.GITHUB_TOKEN }}
-          extra_nix_config: |
-            extra-trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=
-            extra-substituters = https://cache.garnix.io
+      # Cache nix build aritfacts (e.g. agda binaries) in GH actions storage
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - run: nix build --out-link _site
       - uses: actions/upload-pages-artifact@v3
   # GitHub recommends putting deploy in a dedicated job

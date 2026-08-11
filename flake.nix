@@ -11,8 +11,9 @@
           name = "iepje-examples";
           src = ./.;
           buildInputs = [
-            pkgs.entr
-            pkgs.findutils
+            pkgs.darkhttpd
+            pkgs.inotify-tools
+            pkgs.xdg-utils
             agda.outputs.packages.${system}.default
             ];
           buildPhase = ''

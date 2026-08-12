@@ -20,16 +20,16 @@ postulate join : ∀{A} → Promise (Promise A) → Promise A
 {-# COMPILE JS join = _ => ppa => ppa.try(pa => pa) #-}
 
 postulate sequence-IO : ∀{A} → Promise (IO A) → IO (Promise A)
-{-# COMPILE JS sequence-IO = _ => pkka => kpa =>
-  pkka.then
-    (kka => kka
-      (a => kpa
-        (new Promise
-          ( (resolve, reject) => resolve(a)
-          )
-        )
-      )
+{-# COMPILE JS sequence-IO = _ => pkka => kpa => kpa
+  (pkka.then
+    (kka =>
+      {
+        let r;
+        kka (a => r = a);
+        return r;
+      }
     )
+  )
 #-}
 
 mapIO : ∀{A B} → (A → IO B) → Promise A → IO (Promise B)

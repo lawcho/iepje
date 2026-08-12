@@ -14,7 +14,7 @@
             pkgs.darkhttpd
             pkgs.inotify-tools
             pkgs.xdg-utils
-            agda.outputs.packages.${system}.default
+            agda.outputs.packages.${system}.default.bin
             ];
           buildPhase = ''
             bash compile.sh;

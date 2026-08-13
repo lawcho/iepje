@@ -25,6 +25,7 @@ open Cursor
 
 -- Postcondition: cursor moved after the inserted nodes
 insert : ∀{ns t} → Cursor ns t → Doc' ns → IO (vDOM ns)
+{-# TERMINATING #-}
 insert c (text  t) = do e ← DOM.createTextNode (c .doc) t; insert-after c (up e); text t e <$ pure tt
 insert c (ns-tag' ns t f) = do e ← DOM.createElementNS (c .doc) ns t; insert-after c (up e); c' ← init e; tag ns t e <$> insert c' (f e)
 insert c (on'''  t n k) = on''' t n <$> do
@@ -38,3 +39,4 @@ insert c (attr  k v) = attr  k v <$ pure tt -- Hack: ignore attrs, always reappl
 insert c (style k v) = style k v <$ pure tt -- Hack: ignore style, always reapply in future pass
 insert c empty       = empty     <$ pure tt
 insert c (append d₀ d₁) = append <$> insert c d₀ <*> insert c d₁
+insert c (array ds) = array <$> sequenceA (map (insert c) ds)

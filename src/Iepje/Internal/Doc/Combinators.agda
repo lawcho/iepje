@@ -126,6 +126,7 @@ svg s = ns-tag _ "svg" s
 
 -- Change the event type of a Doc
 mapDocIO : ∀{ns a b} → (a → IO b) → Doc' a ns → Doc' b ns
+{-# TERMINATING #-} -- Agda bug: does not work if placed directly on go
 mapDocIO {ns} {a} {b} f = go where
   go : ∀{ns} → Doc' a ns → Doc' b ns
   go (with-submit-event g) = with-submit-event λ submit-event →
@@ -139,6 +140,7 @@ mapDocIO {ns} {a} {b} f = go where
   go (on''' tgt js-event-name g) = on''' tgt js-event-name g
   go (append d1 d2) = append (go d1) (go d2)
   go empty = empty
+  go (array ds) = array (map go ds)
 
 forDocIO : ∀{a b} → Doc a → (a → IO b) → Doc b
 forDocIO d f = mapDocIO f d
@@ -153,5 +155,6 @@ when : Bool → Doc a → Doc a
 when true a = a
 when false _ = empty 
 
-concatDocs : List (Doc' a ns) → Doc' a ns
-concatDocs = foldr _>>_ empty
+concatDocs : List (Doc' a ns) → Doc' a ns -- Legacy
+concatDocs = array
+-- concatDocs = foldr _>>_ empty

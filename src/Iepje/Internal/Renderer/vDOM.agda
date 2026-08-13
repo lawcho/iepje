@@ -7,7 +7,7 @@ import      Iepje.Internal.JS.WebAPIs.DOM as DOM
 open import Iepje.Internal.Doc.Has-style
 
 open import Agda.Builtin.String
-open import Agda.Builtin.Sigma
+open import Agda.Builtin.List
 
 data vDOM (ns : String) : Set where
   tag   : (ns' tag-name : String) → (DOM.ElementNS-of ns' tag-name) → vDOM ns' → vDOM ns
@@ -20,3 +20,4 @@ data vDOM (ns : String) : Set where
   on'''  : (target : DOM.EventTarget) (n : String) → DOM.event-listener n → vDOM ns
   append : vDOM ns → vDOM ns → vDOM ns
   empty : vDOM ns
+  array : List (vDOM ns) → vDOM ns

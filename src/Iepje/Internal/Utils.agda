@@ -10,7 +10,7 @@ open import Agda.Builtin.Bool
 open import Agda.Builtin.String
 open import Agda.Builtin.Sigma
 open import Agda.Builtin.Unit
-open import Agda.Primitive
+open import Agda.Builtin.Equality
 
 private variable
   ℓa ℓb ℓc : Agda.Primitive.Level
@@ -19,34 +19,82 @@ private variable
   C : Set ℓc
   B' : A → Set ℓb
 
+-- Equality
+
+cong : ∀(f : A → B){a1 a2} → a1 ≡ a2 → f a1 ≡ f a2
+cong _ refl = refl
+
+inj-suc : ∀ {m n} → suc m ≡ suc n → m ≡ n
+inj-suc refl = refl
+
+==-to-≡ : ∀{m n} → (m == n) ≡ true → m ≡ n
+==-to-≡ {zero} {zero} p = refl
+==-to-≡ {suc m} {suc n} p = cong suc (==-to-≡ p)
+
 -- Lists
 
-map : (A → B) → List A → List B
-map _ [] = []
-map f (x ∷ xs) = f x ∷ map f xs
-
-map' :  (Nat → A → B) → List A → List B
-map' f = go 0 where
-  go : Nat → List _ → List _
-  go n [] = []
-  go n (x ∷ l) = f n x ∷ go (suc n) l
+indexed-map : (Nat → A → B) → List A → List B
+indexed-map {A = A} {B = B} f = go 0 where
+  go : Nat → List A → List B
+  go _ [] = []
+  go n (a ∷ as) = f n a ∷ go (suc n) as
+{-# COMPILE JS indexed-map = _=> _=> _=> _=> f => as =>
+  {
+    let bs = new Array(as.length);
+    for (let i = 0; i < as.length; i++) {
+      bs[i] = f(BigInt(i))(as[i]);
+    }
+    return bs;
+  }
+#-}
 
 length : List A → Nat
 length [] = 0
-length (_ ∷ xs) = 1 + length xs
+length (_ ∷ l) = 1 + length l
+{-# COMPILE JS length = _ => _ => arr => BigInt (arr.length) #-}
 
-for :  List A → (A → B) → List B
-for l f = map f l
+mapi : (Nat → A → B) → List A → List B
+mapi = indexed-map
 
-for' :  List A → (Nat → A → B) → List B
-for' l f = map' f l
+fori : List A → (Nat → A → B) → List B
+fori l f = indexed-map f l
+
+foldl : (B → A → B) → B → List A → B
+foldl f b [] = b
+foldl f b (a ∷ as) = foldl f (f b a) as
+{-# COMPILE JS foldl = _ => _ => _ => _ => f => b => arr =>
+  arr.reduce
+    ( (accumulator,currentValue) => f(accumulator)(currentValue)
+    , b
+    )
+#-}
 
 foldr : (A → B → B) → B → List A → B
-foldr f z = go where
-  go : _ → _
-  go []         = z
-  go (y ∷ ys) = f y (go ys)
+foldr f b [] = b
+foldr f b (a ∷ as) = f a (foldr f b as)
+{-# COMPILE JS foldr = _ => _ => _ => _ => f => b => arr =>
+  arr.reduceRight
+    ( (accumulator,currentValue) => f(currentValue)(accumulator)
+    , b
+    )
+#-}
 
+map : (A → B) → List A → List B
+map f = indexed-map λ _ → f
+
+for : List A → (A → B) → List B
+for as f = map f as
+
+-- Legacy aliases
+map' = mapi
+for' = fori
+
+zipWith : (A → B → C) → (as : List A) (bs : List B) → length as ≡ length bs → List C
+zipWith f [] [] _ = []
+zipWith f (a ∷ as) (b ∷ bs) p = f a b ∷ zipWith f as bs (inj-suc p)
+{-# COMPILE JS zipWith = _ => _ => _ => _ => _ => _ => f => as => bs => _ =>
+  as.map((a,i) => f(a)(bs[i]))
+#-}
 
 -- Booleans
 
@@ -178,3 +226,15 @@ void m = m >> pure tt
 sequenceA : List (IO A) → IO (List A)
 sequenceA [] = pure []
 sequenceA (x ∷ xs) = _∷_ <$> x <*> sequenceA xs
+{-# COMPILE JS sequenceA = _ => lkka => kla => kla
+  (lkka.map
+    ( kka =>
+      {
+        let r;
+        kka(a => r = a);
+        return r;
+      }
+    )
+  )
+#-}
+

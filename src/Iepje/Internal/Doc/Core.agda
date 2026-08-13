@@ -10,7 +10,7 @@ open import Iepje.Internal.Doc.Has-style
 
 open import Agda.Builtin.Unit 
 open import Agda.Builtin.String
-open import Agda.Builtin.Sigma
+open import Agda.Builtin.List
 
 data Doc' (ns : String) : Set where
   ns-tag' : (ns' tag-name : String)
@@ -27,6 +27,7 @@ data Doc' (ns : String) : Set where
     → Doc' ns
   append : Doc' ns → Doc' ns → Doc' ns
   empty : Doc' ns
+  array : List (Doc' ns) → Doc' ns
 
 Html = Doc' "http://www.w3.org/1999/xhtml"
 Svg = Doc' "http://www.w3.org/2000/svg"

@@ -24,6 +24,7 @@ open Cursor
 -- Pre-condition: cursor has correct parent
 -- Postcondition: cursor unmoved
 re-style : ∀{ns t} → Cursor ns t → vDOM ns → IO ⊤
+{-# TERMINATING #-}
 re-style c (attr  k v)    = do DOM.setAttribute (up (c .parent)) k v; pure tt
 re-style c (style k v)    = do css ← get-style (c .parent); CSSOM.setProperty css k v; pure tt
 re-style c (tag ns t e d) = do c' ← init e; re-style c' d
@@ -34,3 +35,4 @@ re-style c (with-submit-event d) = do re-style c d
 re-style c (text _ _)    = pure tt
 re-style c (on''' _ _ _) = pure tt
 re-style c empty         = pure tt
+re-style c (array ds)    = do sequenceA $ map (re-style c) ds; pure tt

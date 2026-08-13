@@ -48,21 +48,22 @@ private
 open Cursor
 
 -- Precondition: cursor at beginning of rendered vDOM
-darn : ∀{ns t} → vDOM ns → Doc' ns → Cursor ns t → IO (vDOM ns)
+darn : ∀{ns t} → Cursor ns t → vDOM ns → Doc' ns → IO (vDOM ns)
 -- These cases may contain focus to preserve
-darn (with-parent d₀) (with-parent f₁) c =
-  with-parent <$> darn d₀ (f₁ (up (c .parent))) c
-darn (with-document d₀) (with-document f₁) c =
-  with-document <$> do doc ← document; darn d₀ (f₁ (up doc)) c
-darn (with-submit-event d₀) (with-submit-event f₁) c =
-  with-submit-event <$> darn d₀ (f₁ submit-event) c
-darn (append l₀ r₀) (append l₁ r₁) c = append <$> darn l₀ l₁ c <*> darn r₀ r₁ c
-darn (text t₀ e   ) (text t₁     ) c with t₀ == t₁
-darn (text t₀ e   ) (text t₁     ) c | true  = do text t₀ e <$ curse (up e) c
-darn (d₀          ) (d₁          ) c | false = do delete d₀ c; insert d₁ c
-darn (tag ns₀ t₀ e d₀) (ns-tag' ns₁ t₁ f₁  ) c with ns₀ == ns₁ in eqₙₛ | t₀ == t₁ in eqₜ
-darn (tag ns₀ t₀ e d₀) (ns-tag' ns₁ t₁ f₁  ) c | true | true = do
-  tag  ns₀ t₀ e <$> (darn d₀ (lem eqₙₛ eqₜ f₁ e) =<< init e) <* curse (up e) c
-darn (d₀          ) (d₁          ) c | _ | _ = do delete d₀ c; insert d₁ c
+darn c (with-parent d₀) (with-parent f₁) =
+  with-parent <$> darn c d₀ (f₁ (up (c .parent)))
+darn c (with-document d₀) (with-document f₁) =
+  with-document <$> do doc ← document; darn c d₀ (f₁ (up doc))
+darn c (with-submit-event d₀) (with-submit-event f₁) =
+  with-submit-event <$> darn c d₀ (f₁ submit-event)
+darn c (append l₀ r₀) (append l₁ r₁) = append <$> darn c l₀ l₁ <*> darn c r₀ r₁
+darn c (text t₀ e   ) (text t₁     ) with t₀ == t₁
+darn c (text t₀ e   ) (text t₁     ) | true  = do text t₀ e <$ curse (up e) c
+darn c (d₀          ) (d₁          ) | false = do delete c d₀; insert c d₁
+darn c (tag ns₀ t₀ e d₀) (ns-tag' ns₁ t₁ f₁  ) with ns₀ == ns₁ in eqₙₛ | t₀ == t₁ in eqₜ
+darn c (tag ns₀ t₀ e d₀) (ns-tag' ns₁ t₁ f₁  ) | true | true = do
+  c' ← init e
+  tag  ns₀ t₀ e <$> darn c' d₀ (lem eqₙₛ eqₜ f₁ e) <* curse (up e) c
+darn c (d₀          ) (d₁          ) | _ | _ = do delete c d₀; insert c d₁
 -- Anything else? Naively delete & re-insert.
-darn d₀ d₁ c = do delete d₀ c; insert d₁ c
+darn c d₀ d₁ = do delete c d₀; insert c d₁

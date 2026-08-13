@@ -25,14 +25,14 @@ open Cursor
 
 -- Precondition: cursor has correct parent
 -- Postcondition: cursor unmoved
-delete : ∀{ns t} → vDOM ns → Cursor ns t → IO ⊤
-delete (text   t e  ) c = void $ do DOM.removeChild (up (c .parent)) (up e)
-delete (tag ns t e d) c = void $ do DOM.removeChild (up (c .parent)) (up e); delete d =<< init e
-delete (on'''   t n k) c = void $ do DOM.removeEventListener t n k
-delete (with-parent d) c = void $ do delete d c
-delete (with-document d) c = void $ do delete d c
-delete (with-submit-event d) c = void $ do delete d c
-delete (attr  k v)    c = void $ do DOM.removeAttribute (up (c .parent)) k
-delete (style k v)    c = void $ do sd ← get-style (c .parent); CSSOM.removeProperty sd k
-delete empty          _ = void $ pure tt
-delete (append d₀ d₁) c = void $ do delete d₀ c; delete d₁ c
+delete : ∀{ns t} → Cursor ns t → vDOM ns → IO ⊤
+delete c (text   t e  ) = void $ do DOM.removeChild (up (c .parent)) (up e)
+delete c (tag ns t e d) = void $ do DOM.removeChild (up (c .parent)) (up e); c' ← init e; delete c' d
+delete c (on'''   t n k) = void $ do DOM.removeEventListener t n k
+delete c (with-parent d) = void $ do delete c d
+delete c (with-document d) = void $ do delete c d
+delete c (with-submit-event d) = void $ do delete c d
+delete c (attr  k v)    = void $ do DOM.removeAttribute (up (c .parent)) k
+delete c (style k v)    = void $ do sd ← get-style (c .parent); CSSOM.removeProperty sd k
+delete c empty          = void $ pure tt
+delete c (append d₀ d₁) = void $ do delete c d₀; delete c d₁

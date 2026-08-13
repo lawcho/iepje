@@ -84,8 +84,10 @@ addView rs view update parent = do
     doc ← view m  -- Generate the (declarative) Doc
     -- Render, imperatively updating the browser's DOM.
     vd ← get rvd
-    vd' ← Renderer.darn submit-event vd doc  =<< Cursor.init parent
-    Renderer.re-style vd'                    =<< Cursor.init parent
+    c ← Cursor.init parent
+    vd' ← Renderer.darn submit-event c vd doc
+    c' ← Cursor.init parent
+    Renderer.re-style c' vd'
     -- Store the vDOM tracking the new browser DOM
     set rvd vd'
   -- Add this view's rendering callback to the store

@@ -43,7 +43,7 @@ curse : ∀{ns t} → DOM.Node → Cursor ns t → IO ⊤
 curse n c = set (c .left) (just n)
 
 -- Insert a node after the cursor, and move the cursor after it
-insert-after : ∀{ns t} → DOM.Node → Cursor ns t → IO ⊤
-insert-after n c = do
+insert-after : ∀{ns t} → Cursor ns t → DOM.Node → IO ⊤
+insert-after c n = do
   DOM.insertBefore (up (c .parent)) n =<< right c
   curse n c

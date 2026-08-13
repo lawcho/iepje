@@ -23,14 +23,14 @@ open Cursor
 
 -- Pre-condition: cursor has correct parent
 -- Postcondition: cursor unmoved
-re-style : ∀{ns t} → vDOM ns → Cursor ns t → IO ⊤
-re-style (attr  k v)    c = do DOM.setAttribute (up (c .parent)) k v; pure tt
-re-style (style k v)    c = do css ← get-style (c .parent); CSSOM.setProperty css k v; pure tt
-re-style (tag ns t e d) c = do re-style d =<< init e
-re-style (append d₀ d₁) c = do re-style d₀ c ; re-style d₁ c
-re-style (with-parent d) c = do re-style d c
-re-style (with-document d) c = do re-style d c
-re-style (with-submit-event d) c = do re-style d c
-re-style (text _ _)    c = pure tt
-re-style (on''' _ _ _) c = pure tt
-re-style empty         c = pure tt
+re-style : ∀{ns t} → Cursor ns t → vDOM ns → IO ⊤
+re-style c (attr  k v)    = do DOM.setAttribute (up (c .parent)) k v; pure tt
+re-style c (style k v)    = do css ← get-style (c .parent); CSSOM.setProperty css k v; pure tt
+re-style c (tag ns t e d) = do c' ← init e; re-style c' d
+re-style c (append d₀ d₁) = do re-style c d₀ ; re-style c d₁
+re-style c (with-parent d) = do re-style c d
+re-style c (with-document d) = do re-style c d
+re-style c (with-submit-event d) = do re-style c d
+re-style c (text _ _)    = pure tt
+re-style c (on''' _ _ _) = pure tt
+re-style c empty         = pure tt

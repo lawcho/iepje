@@ -24,17 +24,17 @@ open import Agda.Builtin.Sigma
 open Cursor
 
 -- Postcondition: cursor moved after the inserted nodes
-insert : ∀{ns t} → Doc' ns → Cursor ns t → IO (vDOM ns)
-insert (text  t) c = do e ← DOM.createTextNode (c .doc) t; insert-after (up e) c; text t e <$ pure tt
-insert (ns-tag' ns t f) c = do e ← DOM.createElementNS (c .doc) ns t; insert-after (up e) c; tag ns t e <$> (insert (f e) =<< init e)
-insert (on'''  t n k) c = on''' t n <$> do
+insert : ∀{ns t} → Cursor ns t → Doc' ns → IO (vDOM ns)
+insert c (text  t) = do e ← DOM.createTextNode (c .doc) t; insert-after c (up e); text t e <$ pure tt
+insert c (ns-tag' ns t f) = do e ← DOM.createElementNS (c .doc) ns t; insert-after c (up e); c' ← init e; tag ns t e <$> insert c' (f e)
+insert c (on'''  t n k) = on''' t n <$> do
     l ← DOM.mk-event-listener k
     DOM.addEventListener t n l
     pure l
-insert (with-parent f) c = with-parent <$> insert (f (up (c .parent))) c
-insert (with-document f) c = do d ← DOM.document; with-document <$> insert (f (up d)) c
-insert (with-submit-event f) c = insert (f submit-event) c
-insert (attr  k v) _ = attr  k v <$ pure tt -- Hack: ignore attrs, always reapply in future pass
-insert (style k v) _ = style k v <$ pure tt -- Hack: ignore style, always reapply in future pass
-insert empty       _ = empty     <$ pure tt
-insert (append d₀ d₁) c = append <$> insert d₀ c <*> insert d₁ c
+insert c (with-parent f) = with-parent <$> insert c (f (up (c .parent)))
+insert c (with-document f) = do d ← DOM.document; with-document <$> insert c (f (up d))
+insert c (with-submit-event f) = insert c (f submit-event)
+insert c (attr  k v) = attr  k v <$ pure tt -- Hack: ignore attrs, always reapply in future pass
+insert c (style k v) = style k v <$ pure tt -- Hack: ignore style, always reapply in future pass
+insert c empty       = empty     <$ pure tt
+insert c (append d₀ d₁) = append <$> insert c d₀ <*> insert c d₁

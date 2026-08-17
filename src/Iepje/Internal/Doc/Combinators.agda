@@ -151,7 +151,7 @@ mapDoc f d = mapDocIO (pure ∘ f) d
 forDoc : ∀{a b} → Doc a → (a → b) → Doc b
 forDoc d f = forDocIO d (pure ∘ f)
 
-when : Bool → Doc a → Doc a
+when : Bool → Doc' a ns → Doc' a ns
 when true a = a
 when false _ = empty 
 

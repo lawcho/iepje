@@ -8,6 +8,7 @@ open import Agda.Builtin.Nat
 open import Agda.Builtin.Bool
 open import Agda.Builtin.Float
 open import Iepje.Examples.Lib.Float as Float hiding (max; min)
+open import Iepje.Internal.Utils using (if_then_else_)
 
 -- Agda already compiles Lists to JS arrays
 Array = List
@@ -23,13 +24,16 @@ take _ [] = []
 take (suc n) (x ∷ l) = x ∷ take n l
 {-# COMPILE JS take = _ => _ => n => arr => arr.slice(0, Number(n)) #-}
 
-get-with-default : A → Nat → Array A → A
-get-with-default d _ [] = d
-get-with-default d zero (a ∷ _) = a
-get-with-default d (suc n) (_ ∷ l) = get-with-default d n l
-{-# COMPILE JS get-with-default = _ => _ => d => n => arr =>
-  (n < BigInt(arr.length)) ? arr[n] : d
+lookup : B → (A → B) → Nat → Array A → B
+lookup b f _ [] = b
+lookup b f zero (a ∷ arr) = f a
+lookup b f (suc n) (_ ∷ arr) = lookup b f n arr
+{-# COMPILE JS lookup = _ => _ => _ => _ => d => f => n => arr =>
+  (n < BigInt(arr.length)) ? f(arr[n]) : d
 #-}
+
+get-with-default : A → Nat → Array A → A
+get-with-default d = lookup d (λ x → x)
 
 indexed-map : (Nat → A → B) → Array A → Array B
 indexed-map {A = A} {B = B} f = go 0 where
@@ -45,6 +49,9 @@ indexed-map {A = A} {B = B} f = go 0 where
     return bs;
   }
 #-}
+
+update-at : Nat → (A → A) → Array A → Array A
+update-at i f = indexed-map λ j a → if i == j then f a else a
 
 map : (A → B) → Array A → Array B
 map f = indexed-map λ _ → f
@@ -133,3 +140,17 @@ reverse : Array A → Array A
 reverse [] = []
 reverse (a ∷ as) = snoc (reverse as) a
 {-# COMPILE JS reverse = _ => _ => arr => arr.toReversed() #-}
+
+postulate tabulate : Nat → (Nat → A) → Array A
+{-# COMPILE JS tabulate = _ => _ => nn => f =>
+  {
+    let n = Number(nn);
+    let arr = new Array(n);
+    for (let i = 0; i < n; i++)
+      {
+        arr[i] = f(BigInt(i));
+      }
+    return arr;
+  }
+ #-}
+

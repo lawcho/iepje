@@ -17,3 +17,14 @@ postulate +Infinity -Infinity : Float
 
 postulate toFixed : Float → Nat → String
 {-# COMPILE JS toFixed = f => n => f.toFixed(Number(n)) #-}
+
+postulate toExponential : Float → Nat → String
+{-# COMPILE JS toExponential = f => n => f.toExponential(Number(n)) #-}
+
+postulate log10 : Float → Float
+{-# COMPILE JS log10 = f => Math.log10(f) #-}
+
+postulate floor ceil trunc : Float → Float
+{-# COMPILE JS floor = Math.floor #-}
+{-# COMPILE JS ceil = Math.ceil #-}
+{-# COMPILE JS trunc = Math.trunc #-}

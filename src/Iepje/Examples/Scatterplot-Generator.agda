@@ -121,10 +121,10 @@ view m = do
     maxd = 2.0 * rmd
 
     to-y : Delay → Y
-    to-y d = svg-h * (1.0 - (d / maxd))
+    to-y d = if length ds == 0 then 0.0 else (svg-h * (1.0 - (d / maxd)))
 
     to-x : Index → X
-    to-x i = svg-w * (1.0 - (nat i / nat n))
+    to-x i = if length ds == 0 then 0.0 else (svg-w * (1.0 - (nat i / nat n)))
 
 tstep : Float → Model → Model
 tstep Δt m@record {running = true} = record m {delays = Δt ∷ m .delays}

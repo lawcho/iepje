@@ -97,52 +97,52 @@ postulate
 -- Node
 
 postulate appendChild : Node → Node → IO Node
-{-# COMPILE JS appendChild = p => c => kn => kn(p.appendChild(c)) #-}
+{-# COMPILE JS appendChild = p => c => _ => (p.appendChild(c)) #-}
 
 postulate removeChild : Node → Node → IO Node
-{-# COMPILE JS removeChild = p => c => kn => kn(p.removeChild(c)) #-}
+{-# COMPILE JS removeChild = p => c => _ => (p.removeChild(c)) #-}
 
 postulate get-ownerDocument : Node → IO Document
-{-# COMPILE JS get-ownerDocument = n => kd => kd(n.ownerDocument) #-}
+{-# COMPILE JS get-ownerDocument = n => _ => (n.ownerDocument) #-}
 
 postulate get-nextSibling : Node → IO (Node ∪ null)
-{-# COMPILE JS get-nextSibling = n => knon => knon(n.nextSibling) #-}
+{-# COMPILE JS get-nextSibling = n => _ => (n.nextSibling) #-}
 
 postulate get-firstChild : Node → IO (Node ∪ null)
-{-# COMPILE JS get-firstChild = n => knon => knon(n.firstChild) #-}
+{-# COMPILE JS get-firstChild = n => _ => (n.firstChild) #-}
 
 postulate insertBefore : Node → Node → Node ∪ null → IO Node
 -- could also return a DocumentFragment, but that is a sub-type of Node
-{-# COMPILE JS insertBefore = n1 => n2 => n3 => kn => kn(n1.insertBefore(n2,n3)) #-}
+{-# COMPILE JS insertBefore = n1 => n2 => n3 => _ => (n1.insertBefore(n2,n3)) #-}
 
 -- Element
 
 postulate setAttribute : Element → string → string → IO undefined
-{-# COMPILE JS setAttribute = e => sk => sv => kt => kt(e.setAttribute(sk,sv)) #-}
+{-# COMPILE JS setAttribute = e => sk => sv => _ => (e.setAttribute(sk,sv)) #-}
 
 postulate removeAttribute : Element → string → IO undefined
-{-# COMPILE JS removeAttribute = e => sk => kt => kt(e.removeAttribute(sk)) #-}
+{-# COMPILE JS removeAttribute = e => sk => _ => (e.removeAttribute(sk)) #-}
 
 -- This is a var-args function
 postulate replaceChildren : Element → List Node → IO undefined
-{-# COMPILE JS replaceChildren = el => ns => kt => kt(el.replaceChildren(...(ns))) #-}
+{-# COMPILE JS replaceChildren = el => ns => _ => (el.replaceChildren(...(ns))) #-}
 -- Works because Agda List s compile to JS arrays
 
 postulate getBoundingClientRect : Element → IO DOMRect
-{-# COMPILE JS getBoundingClientRect = el => kdr => kdr(el.getBoundingClientRect()) #-}
+{-# COMPILE JS getBoundingClientRect = el => _ => (el.getBoundingClientRect()) #-}
 
 -- HTMLElement
 
 module HTMLElement-methods where
 
   postulate get-style : HTMLElement → IO CSSStyleDeclaration
-  {-# COMPILE JS get-style = e => ksd => ksd(e.style) #-}
+  {-# COMPILE JS get-style = e => _ => (e.style) #-}
 
   postulate get-files : HTMLInputElement → IO FileList
-  {-# COMPILE JS get-files = e => ks => ks(e.files) #-}
+  {-# COMPILE JS get-files = e => _ => (e.files) #-}
 
 postulate get-value : HTMLInputElement → IO string
-{-# COMPILE JS get-value = e => ks => ks(e.value) #-}
+{-# COMPILE JS get-value = e => _ => (e.value) #-}
 
 
 -- SVGElement
@@ -150,84 +150,84 @@ postulate get-value : HTMLInputElement → IO string
 module SVGElement-methods where
 
   postulate get-style : SVGElement → IO CSSStyleDeclaration
-  {-# COMPILE JS get-style = e => ksd => ksd(e.style) #-}
+  {-# COMPILE JS get-style = e => _ => (e.style) #-}
 
 -- MouseEvent
 
 postulate get-offsetX : MouseEvent → IO number
-{-# COMPILE JS get-offsetX = e => kd => kd(e.offsetX) #-}
+{-# COMPILE JS get-offsetX = e => _ => (e.offsetX) #-}
 
 postulate get-offsetY : MouseEvent → IO number
-{-# COMPILE JS get-offsetY = e => kd => kd(e.offsetY) #-}
+{-# COMPILE JS get-offsetY = e => _ => (e.offsetY) #-}
 
 postulate get-clientX : MouseEvent → IO number
-{-# COMPILE JS get-clientX = e => kd => kd(e.clientX) #-}
+{-# COMPILE JS get-clientX = e => _ => (e.clientX) #-}
 
 postulate get-clientY : MouseEvent → IO number
-{-# COMPILE JS get-clientY = e => kd => kd(e.clientY) #-}
+{-# COMPILE JS get-clientY = e => _ => (e.clientY) #-}
 
 postulate get-deltaX : WheelEvent → IO number
-{-# COMPILE JS get-deltaX = e => kd => kd(e.deltaX) #-}
+{-# COMPILE JS get-deltaX = e => _ => (e.deltaX) #-}
 
 postulate get-deltaY : WheelEvent → IO number
-{-# COMPILE JS get-deltaY = e => kd => kd(e.deltaY) #-}
+{-# COMPILE JS get-deltaY = e => _ => (e.deltaY) #-}
 
 postulate get-deltaZ : WheelEvent → IO number
-{-# COMPILE JS get-deltaZ = e => kd => kd(e.deltaX) #-}
+{-# COMPILE JS get-deltaZ = e => _ => (e.deltaX) #-}
 
 -- Document
 
 postulate document : IO Document  --JS global variable
-{-# COMPILE JS document = kd => kd(document) #-}
+{-# COMPILE JS document = _ => (document) #-}
 
 postulate querySelector : Document → string → IO (Element ∪ null)
-{-# COMPILE JS querySelector = d => s => ke => ke(d.querySelector(s)) #-}
+{-# COMPILE JS querySelector = d => s => _ => (d.querySelector(s)) #-}
 
 postulate get-defaultView : Document → IO Window
-{-# COMPILE JS get-defaultView = d => kw => kw(d.defaultView) #-}
+{-# COMPILE JS get-defaultView = d => _ => (d.defaultView) #-}
 
 postulate createTextNode : Document → string → IO Text
-{-# COMPILE JS createTextNode = d => s => kt => kt(d.createTextNode(s)) #-}
+{-# COMPILE JS createTextNode = d => s => _ => (d.createTextNode(s)) #-}
 
 -- Window
 
 postulate setInterval : Window → (undefined → IO ⊤) → number → IO number
 {-# COMPILE JS setInterval
-  = w => callback => millis => kiid => kiid(w.setInterval(_ => callback({})(_=>{}), millis)) #-}
+  = w => callback => millis => _ => (w.setInterval(_ => callback({})(_=>{}), millis)) #-}
 -- The second arg to the callback runs the IO action
 
 postulate requestAnimationFrame : Window → (DOMHighResTimeStamp → IO ⊤) → IO number
 {-# COMPILE JS requestAnimationFrame
-  = w => callback => kn => kn(w.requestAnimationFrame(t => callback(t)(_=>{}))) #-}
+  = w => callback => _ => (w.requestAnimationFrame(t => callback(t)(_=>{}))) #-}
 -- The second arg to the callback runs the IO action
 
 -- Event
 
 postulate preventDefault : Event → IO ⊤
-{-# COMPILE JS preventDefault = e => kt => kt(e.preventDefault()) #-}
+{-# COMPILE JS preventDefault = e => _ => (e.preventDefault()) #-}
 
 postulate key : KeyboardEvent → IO string
-{-# COMPILE JS key = e => ks => ks(e.key) #-}
+{-# COMPILE JS key = e => _ => (e.key) #-}
 
 -- DOMRect
 
 module DOMRect-methods where
   postulate get-top : DOMRect → IO number
-  {-# COMPILE JS get-top = dr => kn => kn(dr.top) #-}
+  {-# COMPILE JS get-top = dr => _ => (dr.top) #-}
   postulate get-right : DOMRect → IO number
-  {-# COMPILE JS get-right = dr => kn => kn(dr.right) #-}
+  {-# COMPILE JS get-right = dr => _ => (dr.right) #-}
   postulate get-bottom : DOMRect → IO number
-  {-# COMPILE JS get-bottom = dr => kn => kn(dr.bottom) #-}
+  {-# COMPILE JS get-bottom = dr => _ => (dr.bottom) #-}
   postulate get-left : DOMRect → IO number
-  {-# COMPILE JS get-left = dr => kn => kn(dr.left) #-}
+  {-# COMPILE JS get-left = dr => _ => (dr.left) #-}
   postulate get-width : DOMRect → IO number
-  {-# COMPILE JS get-width = dr => kn => kn(dr.width) #-}
+  {-# COMPILE JS get-width = dr => _ => (dr.width) #-}
   postulate get-height : DOMRect → IO number
-  {-# COMPILE JS get-height = dr => kn => kn(dr.height) #-}
+  {-# COMPILE JS get-height = dr => _ => (dr.height) #-}
   postulate get-x : DOMRect → IO number
-  {-# COMPILE JS get-x = dr => kn => kn(dr.x) #-}
+  {-# COMPILE JS get-x = dr => _ => (dr.x) #-}
   postulate get-y : DOMRect → IO number
-  {-# COMPILE JS get-y = dr => kn => kn(dr.y) #-}
+  {-# COMPILE JS get-y = dr => _ => (dr.y) #-}
 
 ----------------------------------------------------------------
 -- Value level bindings with dependent types
@@ -249,7 +249,7 @@ instance
 
 -- Create a new HTMLElement
 postulate createElement : Document → (tag-name : string) → IO (Element-of tag-name)
-{-# COMPILE JS createElement = d => s => k => k(d.createElement(s)) #-}
+{-# COMPILE JS createElement = d => s => _ => (d.createElement(s)) #-}
 
 -- The most precise sub-type of Element returned by createElementNS
 postulate ElementNS-of : string → string → Set
@@ -273,7 +273,7 @@ instance
 
 -- Create a new Element
 postulate createElementNS : Document → (namespace : string) (tag-name : string) → IO (ElementNS-of namespace tag-name)
-{-# COMPILE JS createElementNS = d => ns => s => k => k(d.createElementNS(ns, s)) #-}
+{-# COMPILE JS createElementNS = d => ns => s => _ => (d.createElementNS(ns, s)) #-}
 
 -- The most precise sub-type of Event provided to addEventListener's callback
 postulate Event-of : string → Set
@@ -302,15 +302,15 @@ postulate event-listener : string → Set
 
 -- Constructs an event-listener function ready for use in addEventListener and removeEventListener
 postulate mk-event-listener : ∀{s} → (Event-of s → IO ⊤) → IO (event-listener s)
-{-# COMPILE JS mk-event-listener = _ => f => k => k(e => f(e)(_ => {})) #-}
+{-# COMPILE JS mk-event-listener = _ => f => _ => (e => f(e)(_ => {})) #-}
 -- Passing a second argument to f runs the IO action
 -- mk-event-listener returns an IO-wrapped value to prevent over-inlining by Agda,
 -- which could break JS-function-pointer-equalities
 
 postulate addEventListener : EventTarget → (s : string) → event-listener s → IO undefined
-{-# COMPILE JS addEventListener = et => s => callback => k => k(et.addEventListener(s,callback)) #-}
+{-# COMPILE JS addEventListener = et => s => callback => _ => (et.addEventListener(s,callback)) #-}
 -- The second arg to the callback runs the IO actions
 
 postulate removeEventListener : EventTarget → (s : string) → event-listener s → IO undefined
-{-# COMPILE JS removeEventListener = et => s => callback => k => k(et.removeEventListener(s,callback)) #-}
+{-# COMPILE JS removeEventListener = et => s => callback => _ => (et.removeEventListener(s,callback)) #-}
 -- The return type of removeEventListener is unclear (MDN docs say 'None'), so 'undefined' is a guess here

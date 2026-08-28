@@ -18,11 +18,11 @@ postulate Ref : Set → Set
 
 -- Create a new mutable reference
 postulate new : ∀{A} → A → IO (Ref A)
-{-# COMPILE JS new = _ => a => krefa => krefa ({val : a}) #-}
+{-# COMPILE JS new = _ => a => _ => ({val : a}) #-}
 
 -- Update the value stored in a mutable reference & return the new value
 postulate modify : ∀{A} → Ref A → (A → A) → IO A
-{-# COMPILE JS modify = _ => refa => f => kt => kt(refa.val = f(refa.val)) #-}
+{-# COMPILE JS modify = _ => refa => f => _ => (refa.val = f(refa.val)) #-}
 
 -- Derived helper functions
 set : ∀{A} → Ref A → A → IO ⊤

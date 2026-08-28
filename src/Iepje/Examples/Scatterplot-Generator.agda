@@ -35,13 +35,13 @@ open ToJSON
 
 module Download where
   postulate blobbify : String → IO Blob
-  {-# COMPILE JS blobbify = s => k => k(new Blob([s])) #-}
+  {-# COMPILE JS blobbify = s => _ => (new Blob([s])) #-}
 
   URL = String
 
   postulate WindowProxy : Set
   postulate open' : URL → IO (WindowProxy ∪ null) -- Unrelaible on some browsers (but degrades to no-op)
-  {-# COMPILE JS open' = t => k => k(open(t)) #-}
+  {-# COMPILE JS open' = t => _ => (open(t)) #-}
 open Download
 
 -- MVU, plotting, & misc.

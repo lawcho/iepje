@@ -226,15 +226,5 @@ void m = m >> pure tt
 sequenceA : List (IO A) → IO (List A)
 sequenceA [] = pure []
 sequenceA (x ∷ xs) = _∷_ <$> x <*> sequenceA xs
-{-# COMPILE JS sequenceA = _ => lkka => kla => kla
-  (lkka.map
-    ( kka =>
-      {
-        let r;
-        kka(a => r = a);
-        return r;
-      }
-    )
-  )
-#-}
+{-# COMPILE JS sequenceA = _ => lda => _ => lda.map(da => da()) #-}
 

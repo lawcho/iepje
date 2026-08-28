@@ -22,15 +22,15 @@ postulate
 module Blob-methods where
 
   postulate createObjectURL : Blob → IO string
-  {-# COMPILE JS createObjectURL = b => k => k (URL.createObjectURL(b)) #-}
+  {-# COMPILE JS createObjectURL = b => _ => (URL.createObjectURL(b)) #-}
 
 module FileList-methods where
 
   postulate get-length : FileList → IO number
-  {-# COMPILE JS get-length = fl => kn => kn(fl.length) #-}
+  {-# COMPILE JS get-length = fl => _ => (fl.length) #-}
 
   postulate item : FileList → number → IO (File ∪ null)
-  {-# COMPILE JS item = fl => i => k => k(fl.item(i)) #-}
+  {-# COMPILE JS item = fl => i => _ => (fl.item(i)) #-}
 
   postulate to-List : FileList → List File
   {-# COMPILE JS to-List = fl => Array.from(fl) #-}
@@ -38,5 +38,5 @@ module FileList-methods where
 module File-methods where
 
   postulate get-name : File → IO string
-  {-# COMPILE JS get-name = f => k => k(f.name) #-}
+  {-# COMPILE JS get-name = f => _ => (f.name) #-}
 

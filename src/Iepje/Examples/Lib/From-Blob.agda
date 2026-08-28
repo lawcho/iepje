@@ -11,4 +11,4 @@ open import Iepje.Internal.JS.Language.IO using (IO)
 open import Iepje.Examples.Lib.Promise using (Promise)
 
 postulate text : Blob → IO (Promise String)
-{-# COMPILE JS text = b => k => k(b.text()) #-}
+{-# COMPILE JS text = b => _ => (b.text()) #-}

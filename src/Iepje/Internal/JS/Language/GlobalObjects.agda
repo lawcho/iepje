@@ -20,12 +20,12 @@ postulate Object : Set
 module Date-methods where
 
   postulate now : IO number
-  {-# COMPILE JS now = kn => kn(Date.now()) #-}
+  {-# COMPILE JS now = _ => (Date.now()) #-}
 
 module performance-methods where
 
   postulate now : IO number
-  {-# COMPILE JS now = kn => kn(performance.now()) #-}
+  {-# COMPILE JS now = _ => (performance.now()) #-}
 
 -- null
 

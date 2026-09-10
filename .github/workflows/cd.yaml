@@ -19,9 +19,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
-      # Cache nix build aritfacts (e.g. agda binaries) in GH actions storage
-      - uses: DeterminateSystems/nix-installer-action@main
-      - uses: DeterminateSystems/magic-nix-cache-action@main
+      # Cache builds (including of Agda) in a generic nix cache
+      - uses: cachix/install-nix-action@v25
+      - uses: cachix/cachix-action@v14
+        with:
+          name: lawcho
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          # Relies on a cachix auth token (expiring sep 2027)
+          # that was manually generated at
+          # https://app.cachix.org/cache/lawcho/settings/authtokens
+          # and manually installed in
+          # https://github.com/lawcho/iepje/settings/secrets/actions
       - run: nix build --out-link _site
       - uses: actions/upload-pages-artifact@v3
   # GitHub recommends putting deploy in a dedicated job
@@ -36,3 +44,4 @@ jobs:
 
 # Implementaton adapted from
 # https://github.com/compiling-to-categories/concat/blob/7aa7d5ebe165161b7c0aafb8af006020534eaf70/.github/workflows/pages.yml
+# https://nix.dev/guides/recipes/continuous-integration-github-actions#setting-up-github-actions

@@ -67,7 +67,7 @@ apply-update-and-schedule-refresh rs update = do
 addView
   : ∀{model event t}
   → Runtime-Store model
-  → (model → IO (Doc event))
+  → (model → IO (Html event))
   → (event → model → IO model)
   → DOM.ElementNS-of "http://www.w3.org/1999/xhtml" t
   → IO ⊤

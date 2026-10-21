@@ -22,7 +22,7 @@ _+f_ = primFloatPlus
 _*f_ = primFloatTimes
 infixr 20 _+f_
 
-view : Model → Doc Event
+view : Model → Html Event
 view s = do
   svg do
     style "width" "200px"

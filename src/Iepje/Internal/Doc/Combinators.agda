@@ -1,5 +1,5 @@
 
--- User-friendly combinators for writing Doc s
+-- User-friendly combinators for writing Html s
 
 module Iepje.Internal.Doc.Combinators where
 
@@ -21,7 +21,7 @@ open import Agda.Builtin.Unit
 private variable ns : String
 private variable e a b : Set
 
-_>>_ : ∀{ns} → Doc' e ns → Doc' e ns → Doc' e ns
+_>>_ : ∀{ns} → Doc e ns → Doc e ns → Doc e ns
 _>>_ = append
 infixl 20 _>>_
 
@@ -29,7 +29,7 @@ infixl 20 _>>_
 onIO'-Maybe : ∀{ns e}
   → (target : DOM.EventTarget) (js-event-name : String)
   → (DOM.Event-of js-event-name → IO (Maybe e))
-  → Doc' e ns
+  → Doc e ns
 onIO'-Maybe tgt s l = with-submit-event λ submit-event → on''' tgt s λ e →
   l e IO.>>= λ where
     (just v) → submit-event v
@@ -39,19 +39,19 @@ onIO'-Maybe tgt s l = with-submit-event λ submit-event → on''' tgt s λ e →
 onIO' : ∀{ns e}
   → (target : DOM.EventTarget) (js-event-name : String)
   → (DOM.Event-of js-event-name → IO e)
-  → Doc' e ns
+  → Doc e ns
 onIO' tgt s l = onIO'-Maybe tgt s λ e → just <$> l e
 
 -- Attach synchronous pure listener to arbitrary element
 on' : ∀{ns} → (target : DOM.EventTarget) (js-event-name : String)
     → (DOM.Event-of js-event-name → e)
-    → Doc' e ns
+    → Doc e ns
 on' tgt s l = onIO' tgt s (pure ∘ l)
 
 -- Attach synchronous effectful listener to parent element (or root doc.)
 onIO doc-onIO : ∀{ns} → (js-event-name : String)
     → (DOM.Event-of js-event-name → IO e)
-    → Doc' e ns
+    → Doc e ns
 onIO s l = with-parent λ p → onIO' (up p) s l
 doc-onIO s l = with-document λ d → onIO' (up d) s l
 
@@ -59,76 +59,76 @@ doc-onIO s l = with-document λ d → onIO' (up d) s l
 -- Attach synchronous effectful filtering listener to parent element (or root doc.)
 onIO-Maybe doc-onIO-Maybe : ∀{ns} → (js-event-name : String)
     → (DOM.Event-of js-event-name → IO (Maybe e))
-    → Doc' e ns
+    → Doc e ns
 onIO-Maybe s l = with-parent λ p → onIO'-Maybe (up p) s l
 doc-onIO-Maybe s l = with-document λ d → onIO'-Maybe (up d) s l
 
 -- Attach synchronous pure listener to parent element (or root doc.)
 on doc-on : ∀{ns} → (js-event-name : String)
     → (DOM.Event-of js-event-name → e)
-    → Doc' e ns
+    → Doc e ns
 on s h = onIO s (pure ∘ h)
 doc-on s h = doc-onIO s (pure ∘ h)
 
-on-key-down on-key-up : ∀{ns} → (String → Maybe e) → Doc' e ns
+on-key-down on-key-up : ∀{ns} → (String → Maybe e) → Doc e ns
 on-key-down decode = onIO-Maybe "keydown" λ e → decode <$> DOM.key (up e)
 on-key-up   decode = onIO-Maybe "keyup"   λ e → decode <$> DOM.key (up e)
 
 -- Same namespace, passes element
-tag' : ∀{ns} t → (DOM.ElementNS-of ns t → Doc' e ns) → Doc' e ns
+tag' : ∀{ns} t → (DOM.ElementNS-of ns t → Doc e ns) → Doc e ns
 tag' t d = ns-tag' _ t d
 
 -- Changes namespace, no access to element
-ns-tag : ∀{ns} ns' → String → Doc'  e ns' → Doc' e ns
+ns-tag : ∀{ns} ns' → String → Doc  e ns' → Doc e ns
 ns-tag ns t d = ns-tag' ns t λ _ → d
 
 -- Same namespace, no access to element
-tag : ∀{ns} → String → Doc' e ns → Doc' e ns
+tag : ∀{ns} → String → Doc e ns → Doc e ns
 tag t d = ns-tag _ t d
 
-div : Doc e → Doc e
+div : Html e → Html e
 div = tag "div"
 
-span : Doc e → Doc e
+span : Html e → Html e
 span = tag "span"
 
-button : e → Doc e → Doc e
+button : e → Html e → Html e
 button e inner = tag "button" do
   on "click" λ _ → e
   inner
 
-table : Doc e → Doc e
+table : Html e → Html e
 table = tag "table"
 
-tr : Doc e → Doc e
+tr : Html e → Html e
 tr = tag "tr"
 
-td : Doc e → Doc e
+td : Html e → Html e
 td = tag "td"
 
-row : Doc e → Doc e
+row : Html e → Html e
 row inner = div do
   style "display" "flex"
   style "flex-direction" "row"
   inner
 
-col : Doc e → Doc e
+col : Html e → Html e
 col inner = div do
   style "display" "flex"
   style "flex-direction" "column"
   inner
 
-br : Doc e
+br : Html e
 br = tag "br" empty
 
-svg : Svg e → Doc e
+svg : Svg e → Html e
 svg s = ns-tag _ "svg" s
 
 -- Change the event type of a Doc
-mapDocIO : ∀{ns a b} → (a → IO b) → Doc' a ns → Doc' b ns
+mapDocIO : ∀{ns a b} → (a → IO b) → Doc a ns → Doc b ns
 {-# TERMINATING #-} -- Agda bug: does not work if placed directly on go
 mapDocIO {ns} {a} {b} f = go where
-  go : ∀{ns} → Doc' a ns → Doc' b ns
+  go : ∀{ns} → Doc a ns → Doc b ns
   go (with-submit-event g) = with-submit-event λ submit-event →
     go (g (submit-event <=< f))
   go (ns-tag' ns t f) = ns-tag' ns t λ e → (go (f e))
@@ -142,19 +142,19 @@ mapDocIO {ns} {a} {b} f = go where
   go empty = empty
   go (array ds) = array (map go ds)
 
-forDocIO : ∀{a b} → Doc a → (a → IO b) → Doc b
+forDocIO : ∀{a b} → Html a → (a → IO b) → Html b
 forDocIO d f = mapDocIO f d
 
-mapDoc : ∀{a b} → (a → b) → Doc a → Doc b
-mapDoc f d = mapDocIO (pure ∘ f) d
+mapHtml : ∀{a b} → (a → b) → Html a → Html b
+mapHtml f d = mapDocIO (pure ∘ f) d
 
-forDoc : ∀{a b} → Doc a → (a → b) → Doc b
-forDoc d f = forDocIO d (pure ∘ f)
+forHtml : ∀{a b} → Html a → (a → b) → Html b
+forHtml d f = forDocIO d (pure ∘ f)
 
-when : Bool → Doc' a ns → Doc' a ns
+when : Bool → Doc a ns → Doc a ns
 when true a = a
 when false _ = empty 
 
-concatDocs : List (Doc' a ns) → Doc' a ns -- Legacy
+concatDocs : List (Doc a ns) → Doc a ns -- Legacy
 concatDocs = array
 -- concatDocs = foldr _>>_ empty

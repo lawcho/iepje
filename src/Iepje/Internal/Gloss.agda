@@ -38,7 +38,7 @@ playIO
   : CssSelector
   → Nat
   → world
-  → (world → IO (Doc event))
+  → (world → IO (Html event))
   → (event → world → IO world)
   → (Float → world → IO world)
   → IO ⊤
@@ -74,7 +74,7 @@ playIO sel freq m0 view update step = do
 interactIO
   : CssSelector
   → model
-  → (model → IO (Doc event))
+  → (model → IO (Html event))
   → (event → model → IO model)
   → IO ⊤
 interactIO sel m0 view update = do
@@ -85,7 +85,7 @@ play
   : CssSelector -- Element to display under
   → Nat         -- Number of simulation steps to take for each second of real time
   → world       -- The initial world
-  → (world → Doc event)     -- A function to convert the world to a document
+  → (world → Html event)     -- A function to convert the world to a document
   → (event → world → world) -- A function to handle input events
   → (Float → world → world) -- A function to step the world one iteration. It is passed the period of time (in seconds) needing to be advanced
   → IO ⊤
@@ -99,7 +99,7 @@ play sel freq m0 view update step = do
 interact
   : CssSelector -- Element to display under
   → model       -- The initial model
-  → (model → Doc event)     -- A function to convert the model to a document
+  → (model → Html event)     -- A function to convert the model to a document
   → (event → model → model) -- A function to handle input events
   → IO ⊤
 interact sel m0 view update = do
@@ -110,6 +110,6 @@ interact sel m0 view update = do
 -- Display the given document in a DOM node
 display
   : CssSelector -- Element to display under
-  → Doc ⊤       -- Document to display
+  → Html ⊤       -- Document to display
   → IO ⊤
 display sel doc = interact sel tt (const doc) const

@@ -18,7 +18,7 @@ open State
 data Button : Set where
   pause reset lap : Button
 
-view : State → Doc Button
+view : State → Html Button
 view s = col do -- Stopwatch body
   style "border-radius" "1ch"
   style "background" "Black"

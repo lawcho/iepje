@@ -161,7 +161,7 @@ arc-dots = 15
 arc-width = 1
 node-radius = 3
 
-disc : Nat → 𝔽 ² → String → Doc ⊤
+disc : Nat → 𝔽 ² → String → Html ⊤
 disc r (cx , cy) color = div do
   style "background" color
   style "border-radius" "50%"
@@ -171,12 +171,12 @@ disc r (cx , cy) color = div do
   style "left" $ show (hw + cx - r) ++ "px"
   style "top"  $ show (hw + cy - r) ++ "px"
 
-line : 𝔽 ² → 𝔽 ² → String → Doc ⊤
+line : 𝔽 ² → 𝔽 ² → String → Html ⊤
 line start end color = concatDocs $ for (P.enumerate arc-dots) λ i → do
   let θ = i / arc-dots
   disc arc-width ((1 - θ) * start + θ * end) color
 
-view : State → Doc ⊤
+view : State → Html ⊤
 view s = do
   style "width" (show (2 * hw) ++ "px")
   style "height" (show (2 * hw) ++ "px")

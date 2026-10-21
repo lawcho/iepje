@@ -37,19 +37,19 @@ private
   lem' : ∀{ns₀ ns₁ t₀ t₁}
       → ns₀ ≡ ns₁
       → t₀ ≡ t₁
-      → (ElementNS-of ns₁ t₁ → Doc' ns₁) → ElementNS-of ns₀ t₀ → Doc' ns₀
+      → (ElementNS-of ns₁ t₁ → Doc ns₁) → ElementNS-of ns₀ t₀ → Doc ns₀
   lem' refl refl z = z
 
   lem : ∀{ns₀ ns₁ t₀ t₁}
       → ns₀ ==ₛ ns₁ ≡ true
       → t₀ ==ₛ t₁ ≡ true
-      → (ElementNS-of ns₁ t₁ → Doc' ns₁) → ElementNS-of ns₀ t₀ → Doc' ns₀
+      → (ElementNS-of ns₁ t₁ → Doc ns₁) → ElementNS-of ns₀ t₀ → Doc ns₀
   lem x y = lem' (primStringEqualitySound x) (primStringEqualitySound y)
 
 open Cursor
 
 -- Precondition: cursor at beginning of rendered vDOM
-darn : ∀{ns t} → Cursor ns t → vDOM ns → Doc' ns → IO (vDOM ns)
+darn : ∀{ns t} → Cursor ns t → vDOM ns → Doc ns → IO (vDOM ns)
 {-# TERMINATING #-}
 -- These cases may contain focus to preserve
 darn c (with-parent d₀) (with-parent f₁) =

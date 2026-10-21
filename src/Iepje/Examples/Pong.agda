@@ -104,7 +104,7 @@ psf = primShowFloat
 
 module _ where
 
-  view-Paddle : ∀{e} → Paddle → String → Doc e
+  view-Paddle : ∀{e} → Paddle → String → Html e
   view-Paddle paddle left|right = div do
     style "position" "relative"
     style "background" "none"
@@ -124,7 +124,7 @@ module _ where
       style "top" $ "calc(50% + "++ psf (paddle .y) ++"px)"
       style "transform" "translate(0, -50%)" -- set y-position based on center, not top
 
-  view-Ball : ∀{e} → Ball → Doc e
+  view-Ball : ∀{e} → Ball → Html e
   view-Ball ball = div do
     style "background" $ "red"
     style "width" $ ""++ psf ball-diameter ++"px"
@@ -138,7 +138,7 @@ module _ where
     -- br
     -- text "y=" ; text (psf (ball .y)) -- debug
 
-  view-Field : Field → Doc Paddle-Cmd
+  view-Field : Field → Html Paddle-Cmd
   view-Field f = row do
     style "height" $ ""++ psf field-height ++"px"
     attr "tabindex" "0"

@@ -63,7 +63,7 @@ trail-radius = 1
 sun-radius = 50
 hw = 150 -- half of the scene's width, in pixels
 
-disc : Nat → 𝔽 ² → String → Doc ⊤
+disc : Nat → 𝔽 ² → String → Html ⊤
 disc r (cx , cy) color = div do
   style "background" color
   style "border-radius" "50%"
@@ -81,7 +81,7 @@ take 0 _ = []
 take _ [] = []
 take (suc n) (a ∷ as) = a ∷ take n as
 
-view : List1 State → Doc ⊤
+view : List1 State → Html ⊤
 view (s ∷ ss) = do
   style "width" (show (2 * hw) ++ "px")
   style "height" (show (2 * hw) ++ "px")

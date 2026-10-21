@@ -61,7 +61,7 @@ data Msg (n : Nat) : Set where
   submit : Fin n → Msg n
   change : Fin n → String → Msg n
 
-view : ∀{n} → Vec Exercise n → Doc (Msg n)
+view : ∀{n} → Vec Exercise n → Html (Msg n)
 view v with Vec.all (λ ex → ex .millis-remaining == 0) v
 -- View results of quiz
 ... | true = do

@@ -9,14 +9,14 @@ module Iepje.Examples.Dragger where
 
 open import Iepje.Prelude
 
-grid-box : ∀{e} → Nat → Nat → Nat → Nat → Doc e
+grid-box : ∀{e} → Nat → Nat → Nat → Nat → Html e
 grid-box x₀ x₁ y₀ y₁ = do
   style "grid-column-start" $ primShowNat x₀
   style "grid-column-end"   $ primShowNat x₁
   style "grid-row-start"    $ primShowNat y₀
   style "grid-row-end"      $ primShowNat y₁
 
-insertion-list : ∀ {e} → Bool → Bool → (Maybe Nat → e) → List (Doc e) → (Nat → Doc e) → Doc e
+insertion-list : ∀ {e} → Bool → Bool → (Maybe Nat → e) → List (Html e) → (Nat → Html e) → Html e
 insertion-list enabled debug hover docs divider = do
     style "display" "grid"
     -- List items
@@ -63,7 +63,7 @@ dragging m = case m .caret-pos of λ where
   (just _) → true
   nothing → false
 
-view : Model → Doc Event
+view : Model → Html Event
 view m = col do
   doc-on "mouseup" λ _ → drop-marker
   doc-on "blur" λ _ → cancel-drag

@@ -24,7 +24,7 @@ open import Agda.Builtin.Sigma
 open Cursor
 
 -- Postcondition: cursor moved after the inserted nodes
-insert : ∀{ns t} → Cursor ns t → Doc' ns → IO (vDOM ns)
+insert : ∀{ns t} → Cursor ns t → Doc ns → IO (vDOM ns)
 {-# TERMINATING #-}
 insert c (text  t) = do e ← DOM.createTextNode (c .doc) t; insert-after c (up e); text t e <$ pure tt
 insert c (ns-tag' ns t f) = do e ← DOM.createElementNS (c .doc) ns t; insert-after c (up e); c' ← init e; tag ns t e <$> insert c' (f e)

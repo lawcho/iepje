@@ -11,7 +11,7 @@ data Cell : Set where
 next : Cell → Cell
 next = λ where [-] → [-]; [x] → [o]; [o] → [x]
 
-view-Cell  : ∀{e} → Cell → Doc e
+view-Cell  : ∀{e} → Cell → Html e
 view-Cell c = span do
   style "font-style" "bold"; style "font-family" "sans"
   case c of λ where
@@ -151,7 +151,7 @@ winner = λ where
              _   _   _
              _   _   _ ) → just [-]
 
-view : State → Doc Pos
+view : State → Html Pos
 view s = col do
   style "align-items" "center"
   table do
@@ -163,7 +163,7 @@ view s = col do
     (just [-]) → do (span do text "Game drew")                          ; hint
     (just x)   → do (span do view-Cell $ next $ s .to-move; text " won"); hint
   where
-  v : Pos → Doc Pos
+  v : Pos → Html Pos
   v p = td ∘ button p $ do
     style "width" "2em"; style "height" "2em"
     style "background-color" "white"

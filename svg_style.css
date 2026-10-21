@@ -1,0 +1,9 @@
+/* Use a monospace font */
+pre {
+  font-family: Iosevka Fixed SS12;
+}
+/* Ensure the bounding box of each line actually gets drawn, without 'optimization' */
+.line {
+  background: rgba(100, 50, 0, 0.2);
+  /* background: white; */
+}

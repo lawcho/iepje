@@ -15,7 +15,7 @@ open import Iepje.Internal.Renderer.Insert submit-event
 open import Iepje.Internal.Renderer.Delete
 
 open import Iepje.Internal.Renderer.vDOM
-open import Iepje.Internal.Renderer.Cursor
+open import Iepje.Internal.Renderer.Cursor as C using (Cursor)
 
 open import Iepje.Internal.Utils
 open import Iepje.Internal.JS.Language.SubTyping
@@ -60,12 +60,12 @@ darn c (with-submit-event d₀) (with-submit-event f₁) =
   with-submit-event <$> darn c d₀ (f₁ submit-event)
 darn c (append l₀ r₀) (append l₁ r₁) = append <$> darn c l₀ l₁ <*> darn c r₀ r₁
 darn c (text t₀ e   ) (text t₁     ) with t₀ ==ₛ t₁
-darn c (text t₀ e   ) (text t₁     ) | true  = do text t₀ e <$ curse (up e) c
+darn c (text t₀ e   ) (text t₁     ) | true  = do text t₀ <$> C.curse c e
 darn c (d₀          ) (d₁          ) | false = do delete c d₀; insert c d₁
 darn c (tag ns₀ t₀ e d₀) (ns-tag' ns₁ t₁ f₁  ) with ns₀ ==ₛ ns₁ in eqₙₛ | t₀ ==ₛ t₁ in eqₜ
 darn c (tag ns₀ t₀ e d₀) (ns-tag' ns₁ t₁ f₁  ) | true | true = do
-  c' ← init e
-  tag  ns₀ t₀ e <$> darn c' d₀ (lem eqₙₛ eqₜ f₁ e) <* curse (up e) c
+  c' ← C.init e
+  tag  ns₀ t₀ e <$> (darn c' d₀ =<< lem eqₙₛ eqₜ f₁ <$> C.curse c e)
 darn c (d₀          ) (d₁          ) | _ | _ = do delete c d₀; insert c d₁
 darn c (array ds₀) (array ds₁) with length ds₀ ==ₙ length ds₁ in eq
 darn c (array ds₀) (array ds₁) | true  = array <$> sequenceA (zipWith (darn c) ds₀ ds₁ (==-to-≡ eq))

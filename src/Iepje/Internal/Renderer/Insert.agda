@@ -12,7 +12,7 @@ module Iepje.Internal.Renderer.Insert
 
 open import Iepje.Internal.Doc.Core event
 open import Iepje.Internal.Renderer.vDOM
-open import Iepje.Internal.Renderer.Cursor
+open import Iepje.Internal.Renderer.Cursor as C using (Cursor)
 open import Iepje.Internal.Utils
 
 import      Iepje.Internal.JS.WebAPIs.DOM as DOM
@@ -26,8 +26,11 @@ open Cursor
 -- Postcondition: cursor moved after the inserted nodes
 insert : ∀{ns t} → Cursor ns t → Doc ns → IO (vDOM ns)
 {-# TERMINATING #-}
-insert c (text  t) = do e ← DOM.createTextNode (c .doc) t; insert-after c (up e); text t e <$ pure tt
-insert c (ns-tag' ns t f) = do e ← DOM.createElementNS (c .doc) ns t; insert-after c (up e); c' ← init e; tag ns t e <$> insert c' (f e)
+insert c (text  t) = do e ← DOM.createTextNode (c .doc) t; text t <$> C.insert c e
+insert c (ns-tag' ns t f) = do
+  e ← DOM.createElementNS (c .doc) ns t
+  c' ← C.init e
+  tag ns t <$> C.insert c e <*> insert c' (f e)
 insert c (on'''  t n k) = on''' t n <$> do
     l ← DOM.mk-event-listener k
     DOM.addEventListener t n l

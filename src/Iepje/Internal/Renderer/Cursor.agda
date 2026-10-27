@@ -39,11 +39,13 @@ init el = cursor <$> DOM.get-ownerDocument (up el) <*> pure el <*> Ref.new nothi
 
 -- Move the cursor after a DOM Node
 -- Precondition: node under cursor's parent in DOM
-curse : ∀{ns t} → DOM.Node → Cursor ns t → IO ⊤
-curse n c = set (c .left) (just n)
+curse : ∀{ns t N} → Cursor ns t → {{N extends* DOM.Node}} → N → IO N
+curse c n = do
+  set (c .left) (just (up n))
+  pure n
 
 -- Insert a node after the cursor, and move the cursor after it
-insert-after : ∀{ns t} → Cursor ns t → DOM.Node → IO ⊤
-insert-after c n = do
-  DOM.insertBefore (up (c .parent)) n =<< right c
-  curse n c
+insert : ∀{ns t N} → Cursor ns t → {{N extends* DOM.Node}} → N → IO N
+insert c n = do
+  DOM.insertBefore (up (c .parent)) (up n) =<< (right c)
+  curse c n

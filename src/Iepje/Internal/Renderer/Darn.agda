@@ -24,27 +24,8 @@ open import Iepje.Internal.JS.WebAPIs.DOM
 open import Agda.Builtin.String
 open import Agda.Builtin.Bool
 open import Agda.Builtin.Equality
+open import Agda.Builtin.Maybe
 open import Agda.Builtin.Nat renaming (_==_ to _==ₙ_)
-
-postulate
-  -- This could go in Agda.Builtin.String.Properties, but it is not there
-  primStringEqualitySound : ∀ {s1 s2} → primStringEquality s1 s2 ≡ true → s1 ≡ s2
-
-private
-  _==ₛ_ : String → String → Bool
-  _==ₛ_ = primStringEquality
-
-  lem' : ∀{ns₀ ns₁ t₀ t₁}
-      → ns₀ ≡ ns₁
-      → t₀ ≡ t₁
-      → (ElementNS-of ns₁ t₁ → Doc ns₁) → ElementNS-of ns₀ t₀ → Doc ns₀
-  lem' refl refl z = z
-
-  lem : ∀{ns₀ ns₁ t₀ t₁}
-      → ns₀ ==ₛ ns₁ ≡ true
-      → t₀ ==ₛ t₁ ≡ true
-      → (ElementNS-of ns₁ t₁ → Doc ns₁) → ElementNS-of ns₀ t₀ → Doc ns₀
-  lem x y = lem' (primStringEqualitySound x) (primStringEqualitySound y)
 
 open Cursor {{...}}
 
@@ -62,13 +43,13 @@ darn (append l₀ r₀) (append l₁ r₁) = append <$> darn l₀ l₁ <*> darn 
 darn (text t₀ e   ) (text t₁     ) with t₀ ==ₛ t₁
 darn (text t₀ e   ) (text t₁     ) | true  = do text t₀ <$> C.curse e
 darn (d₀          ) (d₁          ) | false = do delete d₀; insert d₁
-darn (tag ns₀ t₀ e d₀) (ns-tag' ns₁ t₁ f₁  ) with ns₀ ==ₛ ns₁ in eqₙₛ | t₀ ==ₛ t₁ in eqₜ
-darn (tag ns₀ t₀ e d₀) (ns-tag' ns₁ t₁ f₁  ) | true | true = do
+darn (tag ns₀ t₀ e d₀) (ns-tag' ns₁ t₁ f₁  ) with ns₀ ≟ₛ ns₁ | t₀ ≟ₛ t₁
+darn (tag ns₀ t₀ e d₀) (ns-tag' ns₁ t₁ f₁  ) | just refl | just refl = do
   c' ← C.init e
-  tag  ns₀ t₀ e <$> (darn {{c'}} d₀ =<< lem eqₙₛ eqₜ f₁ <$> C.curse e)
+  tag  ns₀ t₀ <$> C.curse e <*> darn {{c'}} d₀ (f₁ e)
 darn (d₀          ) (d₁          ) | _ | _ = do delete d₀; insert d₁
-darn (array ds₀) (array ds₁) with length ds₀ ==ₙ length ds₁ in eq
-darn (array ds₀) (array ds₁) | true  = array <$> sequenceA (zipWith darn ds₀ ds₁ (==-to-≡ eq))
-darn (d₀       ) (d₁       ) | false = do delete d₀; insert d₁
+darn (array ds₀) (array ds₁) with length ds₀ ≟ₙ length ds₁
+darn (array ds₀) (array ds₁) | just p  = array <$> sequenceA (zipWith darn ds₀ ds₁ p)
+darn (d₀       ) (d₁       ) | nothing = do delete d₀; insert d₁
 -- Anything else? Naively delete & re-insert.
 darn d₀ d₁ = do delete d₀; insert d₁

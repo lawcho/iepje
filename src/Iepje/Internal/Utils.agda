@@ -11,6 +11,7 @@ open import Agda.Builtin.String
 open import Agda.Builtin.Sigma
 open import Agda.Builtin.Unit
 open import Agda.Builtin.Equality
+open import Agda.Builtin.Maybe
 
 private variable
   ℓa ℓb ℓc : Agda.Primitive.Level
@@ -27,9 +28,27 @@ cong _ refl = refl
 inj-suc : ∀ {m n} → suc m ≡ suc n → m ≡ n
 inj-suc refl = refl
 
-==-to-≡ : ∀{m n} → (m == n) ≡ true → m ≡ n
-==-to-≡ {zero} {zero} p = refl
-==-to-≡ {suc m} {suc n} p = cong suc (==-to-≡ p)
+_==ₛ_ = primStringEquality
+_==ₙ_ = _==_
+
+postulate
+  -- This could go in Agda.Builtin.String.Properties, but it is not there
+  ==ₛ-to-≡ : ∀ {s1 s2} → (s1 ==ₛ s2) ≡ true → s1 ≡ s2
+
+==ₙ-to-≡ : ∀ {n1 n2} → (n1 ==ₙ n2) ≡ true → n1 ≡ n2
+==ₙ-to-≡ {n1 = zero} {n2 = zero} _ = refl
+==ₙ-to-≡ {n1 = suc n1} {n2 = suc n2} p = cong suc (==ₙ-to-≡ p)
+ 
+mk-≟ : {A : Set} → (_==_ : A → A → Bool) → (sound : ∀{x y} → (x == y) ≡ true → x ≡ y) → (x y : A) → Maybe (x ≡ y)
+mk-≟ _==_ sound x y with x == y in eq
+... | true  = just (sound eq)
+... | false = nothing
+
+_≟ₙ_ : (x y : Nat) → Maybe (x ≡ y)
+_≟ₙ_ = mk-≟ _ ==ₙ-to-≡
+
+_≟ₛ_ : (x y : String) → Maybe (x ≡ y)
+_≟ₛ_ = mk-≟ _ ==ₛ-to-≡
 
 -- Lists
 

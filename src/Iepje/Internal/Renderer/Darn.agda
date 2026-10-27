@@ -46,29 +46,29 @@ private
       → (ElementNS-of ns₁ t₁ → Doc ns₁) → ElementNS-of ns₀ t₀ → Doc ns₀
   lem x y = lem' (primStringEqualitySound x) (primStringEqualitySound y)
 
-open Cursor
+open Cursor {{...}}
 
 -- Precondition: cursor at beginning of rendered vDOM
-darn : ∀{ns t} → Cursor ns t → vDOM ns → Doc ns → IO (vDOM ns)
+darn : ∀{ns t} → {{Cursor ns t}} → vDOM ns → Doc ns → IO (vDOM ns)
 {-# TERMINATING #-}
 -- These cases may contain focus to preserve
-darn c (with-parent d₀) (with-parent f₁) =
-  with-parent <$> darn c d₀ (f₁ (up (c .parent)))
-darn c (with-document d₀) (with-document f₁) =
-  with-document <$> do doc ← document; darn c d₀ (f₁ (up doc))
-darn c (with-submit-event d₀) (with-submit-event f₁) =
-  with-submit-event <$> darn c d₀ (f₁ submit-event)
-darn c (append l₀ r₀) (append l₁ r₁) = append <$> darn c l₀ l₁ <*> darn c r₀ r₁
-darn c (text t₀ e   ) (text t₁     ) with t₀ ==ₛ t₁
-darn c (text t₀ e   ) (text t₁     ) | true  = do text t₀ <$> C.curse c e
-darn c (d₀          ) (d₁          ) | false = do delete c d₀; insert c d₁
-darn c (tag ns₀ t₀ e d₀) (ns-tag' ns₁ t₁ f₁  ) with ns₀ ==ₛ ns₁ in eqₙₛ | t₀ ==ₛ t₁ in eqₜ
-darn c (tag ns₀ t₀ e d₀) (ns-tag' ns₁ t₁ f₁  ) | true | true = do
+darn (with-parent d₀) (with-parent f₁) =
+  with-parent <$> darn d₀ (f₁ (up parent))
+darn (with-document d₀) (with-document f₁) =
+  with-document <$> do doc ← document; darn d₀ (f₁ (up doc))
+darn (with-submit-event d₀) (with-submit-event f₁) =
+  with-submit-event <$> darn d₀ (f₁ submit-event)
+darn (append l₀ r₀) (append l₁ r₁) = append <$> darn l₀ l₁ <*> darn r₀ r₁
+darn (text t₀ e   ) (text t₁     ) with t₀ ==ₛ t₁
+darn (text t₀ e   ) (text t₁     ) | true  = do text t₀ <$> C.curse e
+darn (d₀          ) (d₁          ) | false = do delete d₀; insert d₁
+darn (tag ns₀ t₀ e d₀) (ns-tag' ns₁ t₁ f₁  ) with ns₀ ==ₛ ns₁ in eqₙₛ | t₀ ==ₛ t₁ in eqₜ
+darn (tag ns₀ t₀ e d₀) (ns-tag' ns₁ t₁ f₁  ) | true | true = do
   c' ← C.init e
-  tag  ns₀ t₀ e <$> (darn c' d₀ =<< lem eqₙₛ eqₜ f₁ <$> C.curse c e)
-darn c (d₀          ) (d₁          ) | _ | _ = do delete c d₀; insert c d₁
-darn c (array ds₀) (array ds₁) with length ds₀ ==ₙ length ds₁ in eq
-darn c (array ds₀) (array ds₁) | true  = array <$> sequenceA (zipWith (darn c) ds₀ ds₁ (==-to-≡ eq))
-darn c (d₀       ) (d₁       ) | false = do delete c d₀; insert c d₁
+  tag  ns₀ t₀ e <$> (darn {{c'}} d₀ =<< lem eqₙₛ eqₜ f₁ <$> C.curse e)
+darn (d₀          ) (d₁          ) | _ | _ = do delete d₀; insert d₁
+darn (array ds₀) (array ds₁) with length ds₀ ==ₙ length ds₁ in eq
+darn (array ds₀) (array ds₁) | true  = array <$> sequenceA (zipWith darn ds₀ ds₁ (==-to-≡ eq))
+darn (d₀       ) (d₁       ) | false = do delete d₀; insert d₁
 -- Anything else? Naively delete & re-insert.
-darn c d₀ d₁ = do delete c d₀; insert c d₁
+darn d₀ d₁ = do delete d₀; insert d₁

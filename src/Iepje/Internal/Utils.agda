@@ -193,6 +193,9 @@ infixr 21 _<$>_
 _<$_ : A → IO B → IO A
 a <$ fb = const a <$> fb
 
+_$>_ : IO A → B → IO B
+fa $> b = b <$ fa
+
 _<&>_ : IO A → (A → B) → IO B
 x <&> f = f <$> x
 
@@ -246,4 +249,10 @@ sequenceA : List (IO A) → IO (List A)
 sequenceA [] = pure []
 sequenceA (x ∷ xs) = _∷_ <$> x <*> sequenceA xs
 {-# COMPILE JS sequenceA = _ => lda => _ => lda.map(da => da()) #-}
+
+mapA : (A → IO B) → List A → IO (List B)
+mapA f as = sequenceA (map f as)
+
+zipWithA : (A → B → IO C) → (as : List A) (bs : List B) → length as ≡ length bs → IO (List C)
+zipWithA f as bs pf = sequenceA (zipWith f as bs pf)
 

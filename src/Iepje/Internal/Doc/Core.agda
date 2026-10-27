@@ -1,35 +1,35 @@
 
--- Data type of HTML documents
--- Minimal contents, for internal use by renderer
+-- Definition of `Doc`uments
 
-module Iepje.Internal.Doc.Core (event : Set) where
+module Iepje.Internal.Doc.Core (e : Set) where
 
-import      Iepje.Internal.JS.WebAPIs.DOM as DOM
+open import Agda.Builtin.Unit using (⊤)
+open import Agda.Builtin.String using (String)
 open import Iepje.Internal.JS.Language.IO using (IO)
-open import Iepje.Internal.Doc.Has-style
+open import Iepje.Internal.Renderer.vDOM using (vDOM)
+open import Iepje.Internal.Renderer.Cursor using (Cursor)
 
-open import Agda.Builtin.Unit 
-open import Agda.Builtin.String
-open import Agda.Builtin.List
+record EventConsumer : Set where
+  constructor mk-EC
+  field submit-event : e → IO ⊤
 
-data Doc (ns : String) : Set where
+-- Without this 'opaque', yellow warnings would appear any code constructing a nested Doc,
+-- since Doc's instance & implicit arguments would be eagerly inserted,
+-- then fail to resolve since there are too many instances avaiable.
 
-  ns-tag' : (ns' tag-name : String)
-    → (DOM.ElementNS-of ns' tag-name → Doc ns')
-    → Doc ns
-  text : String → Doc ns
-  attr : String → String → Doc ns -- applies to the *parent* element
-  style : {{Has-style ns}} → String → String → Doc ns -- applies to the *parent* element
-  with-parent : (DOM.Element → Doc ns) → Doc ns
-  with-document : (DOM.Document → Doc ns) → Doc ns
-  with-submit-event : ((event → IO ⊤) → Doc ns) → Doc ns
-  on''' : (target : DOM.EventTarget) (js-event-name : String)
-    → (DOM.Event-of js-event-name → IO ⊤)
-    → Doc ns
-  append : Doc ns → Doc ns → Doc ns
-  empty : Doc ns
-  array : List (Doc ns) → Doc ns
+-- Alternatives to opaque:
+-- * Use a data type for Doc
+-- * Add a dummy argument
+-- * Make {t : String} explicit
+-- * Change Agda's default (c.f. Haskell's lazy & shallow instantiation)
 
+opaque
+  Doc : String → Set
+  Doc ns = 
+    {t : String}
+    {{cursor : Cursor ns t}}
+    {{event-consumer : EventConsumer}}
+    → vDOM ns → IO (vDOM ns)
 
 Html = Doc "http://www.w3.org/1999/xhtml"
 Svg = Doc "http://www.w3.org/2000/svg"

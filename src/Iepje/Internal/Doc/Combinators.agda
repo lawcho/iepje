@@ -3,13 +3,16 @@
 
 module Iepje.Internal.Doc.Combinators where
 
-open import Iepje.Internal.Utils hiding (_>>_)
-
-import      Iepje.Internal.JS.WebAPIs.DOM as DOM
-open import Iepje.Internal.JS.Language.IO as IO using (IO; pure)
-open import Iepje.Internal.JS.Language.SubTyping using (up)
+open import Iepje.Internal.Utils as Utils using ()
 
 open import Iepje.Internal.Doc.Core
+open import Iepje.Internal.JS.WebAPIs.DOM as DOM using ()
+open import Iepje.Internal.JS.Language.IO as IO using (IO; pure; _>>=_)
+open import Iepje.Internal.JS.Language.SubTyping using (up)
+open import Iepje.Internal.Renderer.vDOM as vDOM using (vDOM)
+open import Iepje.Internal.Renderer.Cursor
+open import Iepje.Internal.Renderer.Delete
+
 open import Iepje.Internal.Doc.Has-style
 open import Agda.Builtin.String
 open import Agda.Builtin.List
@@ -17,20 +20,95 @@ open import Agda.Builtin.Sigma
 open import Agda.Builtin.Bool
 open import Agda.Builtin.Maybe
 open import Agda.Builtin.Unit
+open import Agda.Builtin.Equality
 
 private variable ns : String
 private variable e a b : Set
 
-_>>_ : ∀{ns} → Doc e ns → Doc e ns → Doc e ns
+module _ where opaque
+
+  unfolding Doc
+
+  open Utils
+  open Cursor {{...}}
+  open EventConsumer {{...}}
+
+  private
+    ε : vDOM ns
+    ε = vDOM.empty
+
+  ns-tag' : (ns' tag-name : String) → (DOM.ElementNS-of ns' tag-name → Doc e ns') → Doc e ns
+  ns-tag' n₁ t₁ _ (vDOM.tag n₀ t₀ _ _) with n₀ ≟ₛ n₁ | t₀ ≟ₛ t₁
+  ns-tag' _  _  f (vDOM.tag n₀ t₀ el v)  | just refl | just refl = do
+    c' ← init el
+    vDOM.tag n₀ t₀ <$> curse el <*> f el {{c'}} v
+  ns-tag' n t f v | _ | _ = delete v >> do  -- duplicate case; want guards
+    el ← DOM.createElementNS doc n t
+    c' ← init el
+    vDOM.tag n t <$> insert el <*> f el {{c'}} ε
+  ns-tag' n t f v = delete v >> do
+    el ← DOM.createElementNS doc n t
+    c' ← init el
+    vDOM.tag n t <$> insert el <*> f el {{c'}} ε
+
+  text : String → Doc e ns
+  text msg₁ (vDOM.text msg₀ el) with msg₀ ==ₛ msg₁
+  ... | true  = pure (vDOM.text msg₀ el)
+  text msg v | _ = do delete v; vDOM.text msg <$> (insert =<< DOM.createTextNode doc msg) -- DC;WG
+  text msg v     = do delete v; vDOM.text msg <$> (insert =<< DOM.createTextNode doc msg)
+
+  attr : String → String → Doc e ns -- applies to the *parent* element
+  attr k v vd = do curse-attr k v; delete vd $> vDOM.attr k v
+
+  style : {{Has-style ns}} → String → String → Doc e ns -- applies to the *parent* element
+  style k v vd = do curse-style k v; delete vd $> vDOM.attr k v
+
+  with-parent : (DOM.Element → Doc e ns) → Doc e ns
+  with-parent k = k (up parent)
+
+  with-document : (DOM.Document → Doc e ns) → Doc e ns
+  with-document k = k doc
+
+  with-submit-event : ((e → IO ⊤) → Doc e ns) → Doc e ns
+  with-submit-event k = k submit-event
+
+  on''' : (target : DOM.EventTarget) (js-event-name : String)
+    → (DOM.Event-of js-event-name → IO ⊤)
+    → Doc e ns
+  on''' t n k v = delete v >> do
+    l ← DOM.mk-event-listener k
+    DOM.addEventListener t n l
+    pure $ vDOM.on''' t n l
+  -- Cannot reliably test if new k = old k (since new k unfrozen), so always delete & replace
+
+  append : Doc e ns → Doc e ns → Doc e ns
+  append d1 d2 (vDOM.append v1 v2) = vDOM.append <$> d1 v1 <*> d2 v2
+  append d1 d2 v      = do delete v; vDOM.append <$> d1 ε  <*> d2 ε
+
+  empty : Doc e ns
+  empty v = delete v >> pure vDOM.empty
+
+  array : List (Doc e ns) → Doc e ns
+  array ds v@(vDOM.array vs) with length ds ≟ₙ length vs
+  ... | just p = do           vDOM.array <$> zipWithA (λ d v → d v) ds vs p
+  ... | _      = do delete v; vDOM.array <$> mapA     (λ d   → d ε) ds -- DC;WG
+  array ds v   = do delete v; vDOM.array <$> mapA     (λ d   → d ε) ds
+
+open Utils hiding (_>>_)
+
 _>>_ = append
 infixl 20 _>>_
 
--- Attach synchronous effectful filtering event listener to arbitrary element
+-- Attach a
+--    synchronous effectful filtering
+--  event listener to
+--    an arbitrary element
 onIO'-Maybe : ∀{ns e}
   → (target : DOM.EventTarget) (js-event-name : String)
   → (DOM.Event-of js-event-name → IO (Maybe e))
   → Doc e ns
-onIO'-Maybe tgt s l = with-submit-event λ submit-event → on''' tgt s λ e →
+onIO'-Maybe tgt s l = with-submit-event λ submit-event →
+  on''' tgt s λ e →
   l e IO.>>= λ where
     (just v) → submit-event v
     nothing → pure tt
@@ -124,23 +202,13 @@ br = tag "br" empty
 svg : Svg e → Html e
 svg s = ns-tag _ "svg" s
 
--- Change the event type of a Doc
-mapDocIO : ∀{ns a b} → (a → IO b) → Doc a ns → Doc b ns
-{-# TERMINATING #-} -- Agda bug: does not work if placed directly on go
-mapDocIO {ns} {a} {b} f = go where
-  go : ∀{ns} → Doc a ns → Doc b ns
-  go (with-submit-event g) = with-submit-event λ submit-event →
-    go (g (submit-event <=< f))
-  go (ns-tag' ns t f) = ns-tag' ns t λ e → (go (f e))
-  go (text txt) = text txt
-  go (attr k v) = attr k v
-  go (style k v) = style k v
-  go (with-parent g) = with-parent λ p → go (g p)
-  go (with-document g) = with-document λ d → go (g d)
-  go (on''' tgt js-event-name g) = on''' tgt js-event-name g
-  go (append d1 d2) = append (go d1) (go d2)
-  go empty = empty
-  go (array ds) = array (map go ds)
+opaque
+  unfolding Doc
+
+  -- Change the event type of a Doc
+  mapDocIO : ∀{ns A B} → (A → IO B) → Doc A ns → Doc B ns
+  mapDocIO f d {{event-consumer = mk-EC kb}} =
+             d {{event-consumer = mk-EC (kb <=< f)}}
 
 forDocIO : ∀{a b} → Html a → (a → IO b) → Html b
 forDocIO d f = mapDocIO f d
@@ -157,4 +225,3 @@ when false _ = empty
 
 concatDocs : List (Doc a ns) → Doc a ns -- Legacy
 concatDocs = array
--- concatDocs = foldr _>>_ empty

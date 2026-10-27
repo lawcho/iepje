@@ -19,7 +19,6 @@ open import Iepje.Prelude as P
     ; primShowNat to sn
     )
 open import Agda.Builtin.Equality
-open import Iepje.Internal.Doc.Core using (empty)
 open import Iepje.Internal.JS.Language.Union using (_∪_)
 open import Iepje.Internal.JS.Language.PrimitiveTypes using (null)
 open import Iepje.Internal.JS.WebAPIs.File using (Blob; module Blob-methods)

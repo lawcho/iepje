@@ -7,7 +7,6 @@ import      Iepje.Internal.Renderer.vDOM    as vDOM
 import      Iepje.Internal.Renderer.Cursor  as Cursor
 import      Iepje.Internal.Renderer.Darn    as Renderer
 import      Iepje.Internal.Renderer.vDOM    as Renderer
-import      Iepje.Internal.Renderer.Style   as Renderer
 
 open import Iepje.Internal.Doc.Core as Html
 import      Iepje.Internal.Doc.Combinators as Html
@@ -86,8 +85,6 @@ addView rs view update parent = do
     vd ← get rvd
     c ← Cursor.init parent
     vd' ← Renderer.darn submit-event {{c}} vd doc
-    c' ← Cursor.init parent
-    Renderer.re-style {{c'}} vd'
     -- Store the vDOM tracking the new browser DOM
     set rvd vd'
   -- Add this view's rendering callback to the store

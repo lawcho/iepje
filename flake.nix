@@ -13,6 +13,7 @@
               name = "iepje-examples";
               src = ./.;
               buildInputs = [ agda ];
+              LC_ALL="C.utf8";
               buildPhase = "bash compile.sh";
               installPhase = "mv web/ $out";
             };

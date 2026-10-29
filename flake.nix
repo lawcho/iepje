@@ -1,7 +1,7 @@
 {
   inputs.nixpkgs.url = "github:nixos/nixpkgs/26.05";
   inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.agda.url = "github:agda/agda/59f6359"; # Older versions have JS backend bugs
+  inputs.agda.url = "github:agda/agda/df8c388";
   outputs = inputs:
     (inputs.flake-utils.lib.eachDefaultSystem
       (system:

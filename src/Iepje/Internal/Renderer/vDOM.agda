@@ -14,9 +14,6 @@ data vDOM (ns : String) : Set where
   text  : String → DOM.Text → vDOM ns
   attr  : String → String → vDOM ns
   style : {{Has-style ns}} → String → String → vDOM ns
-  with-parent : vDOM ns → vDOM ns
-  with-document : vDOM ns → vDOM ns
-  with-submit-event : vDOM ns → vDOM ns
   on'''  : (target : DOM.EventTarget) (n : String) → DOM.event-listener n → vDOM ns
   append : vDOM ns → vDOM ns → vDOM ns
   empty : vDOM ns

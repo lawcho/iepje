@@ -35,8 +35,8 @@ insert (on'''  t n k) = on''' t n <$> do
     l ← DOM.mk-event-listener k
     DOM.addEventListener t n l
     pure l
-insert (with-parent f) = with-parent <$> insert (f (up parent))
-insert (with-document f) = do d ← DOM.document; with-document <$> insert (f d)
+insert (with-parent f) = insert (f (up parent))
+insert (with-document f) = do d ← DOM.document; insert (f d)
 insert (with-submit-event f) = insert (f submit-event)
 insert (attr  k v) = attr  k v <$ C.curse-attr k v
 insert (style k v) = style k v <$ C.curse-style k v

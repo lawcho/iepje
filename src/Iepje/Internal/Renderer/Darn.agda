@@ -33,12 +33,9 @@ open Cursor {{...}}
 darn : ∀{ns t} → {{Cursor ns t}} → vDOM ns → Doc ns → IO (vDOM ns)
 {-# TERMINATING #-}
 -- These cases may contain focus to preserve
-darn (with-parent d₀) (with-parent f₁) =
-  with-parent <$> darn d₀ (f₁ (up parent))
-darn (with-document d₀) (with-document f₁) =
-  with-document <$> do doc ← document; darn d₀ (f₁ (up doc))
-darn (with-submit-event d₀) (with-submit-event f₁) =
-  with-submit-event <$> darn d₀ (f₁ submit-event)
+darn d₀ (with-parent f₁) = darn d₀ (f₁ (up parent))
+darn d₀ (with-document f₁) = do doc ← document; darn d₀ (f₁ (up doc))
+darn d₀ (with-submit-event f₁) = darn d₀ (f₁ submit-event)
 darn (append l₀ r₀) (append l₁ r₁) = append <$> darn l₀ l₁ <*> darn r₀ r₁
 darn (text t₀ e   ) (text t₁     ) with t₀ ==ₛ t₁
 darn (text t₀ e   ) (text t₁     ) | true  = do text t₀ <$> C.curse e

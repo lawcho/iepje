@@ -30,9 +30,6 @@ delete : ∀{ns t} → {{Cursor ns t}} → vDOM ns → IO ⊤
 delete (text   t e  ) = void $ do DOM.removeChild (up parent) (up e)
 delete (tag ns t e d) = void $ do DOM.removeChild (up parent) (up e); c' ← init e; delete {{c'}} d
 delete (on'''   t n k) = void $ do DOM.removeEventListener t n k
-delete (with-parent d) = void $ do delete d
-delete (with-document d) = void $ do delete d
-delete (with-submit-event d) = void $ do delete d
 delete (attr  k _)    = restore-attr k
 delete (style k _)    = restore-style k
 delete empty          = void $ pure tt

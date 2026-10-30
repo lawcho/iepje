@@ -40,12 +40,10 @@ module _ where opaque
   ns-tag' : (ns' tag-name : String) → (DOM.ElementNS-of ns' tag-name → Doc e ns') → Doc e ns
   ns-tag' n₁ t₁ _ (vDOM.tag n₀ t₀ _ _) with n₀ ≟ₛ n₁ | t₀ ≟ₛ t₁
   ns-tag' _  _  f (vDOM.tag n₀ t₀ el v)  | just refl | just refl = do
-    c' ← init el
-    vDOM.tag n₀ t₀ <$> curse el <*> f el {{c'}} v
+    vDOM.tag n₀ t₀ <$> curse el <*> (f el v =<<ᵢ init el)
   ns-tag' n t f v | _ | _ = delete v >> do  -- duplicate case; want guards
     el ← DOM.createElementNS doc n t
-    c' ← init el
-    vDOM.tag n t <$> insert el <*> f el {{c'}} ε
+    vDOM.tag n t <$> insert el <*> (f el ε =<<ᵢ init el)
   ns-tag' n t f v = delete v >> do
     el ← DOM.createElementNS doc n t
     c' ← init el

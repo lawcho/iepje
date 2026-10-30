@@ -9,7 +9,7 @@ open import Iepje.Internal.Renderer.Cursor using (Cursor; init)
 open import Iepje.Internal.Renderer.vDOM using (vDOM)
 
 open import Iepje.Internal.JS.Language.IO using (IO; _>>=_; pure)
-open import Iepje.Internal.Utils using (_>>_)
+open import Iepje.Internal.Utils
 
 open import Agda.Builtin.Unit
 
@@ -25,7 +25,7 @@ opaque
     → Doc e ns
     → vDOM ns
     → IO (vDOM ns)
-  darn parent submit-event d v = do
-    c ← init parent
-    v' ← d {{c}}{{mk-EC submit-event}} v
-    pure v'
+  darn parent submit-event d v =
+    init parent >>=ᵢ
+    mk-EC submit-event &ᵢ
+    d v

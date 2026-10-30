@@ -221,6 +221,18 @@ _<=<_ : (B -> IO C) -> (A -> IO B) -> A -> IO C
   c ← fmc b
   pure c
 
+_>>=ᵢ_ : (IO A) → ({{A}} → IO B) → IO B
+ma >>=ᵢ f = ma >>= λ a → f {{a}}
+infixr 20 _>>=ᵢ_
+
+_=<<ᵢ_ : ({{A}} → IO B) → IO A → IO B
+f =<<ᵢ ma = ma >>=ᵢ f
+infixl 20 _=<<ᵢ_
+
+_&ᵢ_ : A → ({{A}} → B) → B
+a &ᵢ f = f {{a}}
+infixr 20 _&ᵢ_
+
 -- Helper for type of _$$_
 IO? : Bool → Set → Set
 IO? false A =    A

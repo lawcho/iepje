@@ -46,8 +46,7 @@ module _ where opaque
     vDOM.tag n t <$> insert el <*> (f el ε =<<ᵢ init el)
   ns-tag' n t f v = delete v >> do
     el ← DOM.createElementNS doc n t
-    c' ← init el
-    vDOM.tag n t <$> insert el <*> f el {{c'}} ε
+    vDOM.tag n t <$> insert el <*> (f el ε =<<ᵢ init el)
 
   text : String → Doc e ns
   text msg₁ (vDOM.text msg₀ el) with msg₀ ==ₛ msg₁

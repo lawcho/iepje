@@ -154,8 +154,8 @@ s0 .sound = refl
 -- GUI code
 -----------
 
-fps = 20
-max-Δt = 0.1   -- If animation lags more than this, pause the simulation
+target-Δt = 50  -- target time between simulation steps
+max-Δt = 100   -- If simulation lags more than this, pause the simulation
 
 arc-dots = 15
 arc-width = 1
@@ -193,8 +193,8 @@ view s = do
     disc 3 (lookup (s .x) i) "blue"
 
 fdgl = play "#verlet-fdgl-app"
-  fps
+  target-Δt
   s0
   view
   (λ _ s → s)
-  (λ where Δt → if max-Δt < Δt then (λ x → x) else step' Δt)
+  (λ where Δt → if max-Δt < Δt then (λ x → x) else step' (Δt / 1000.0))

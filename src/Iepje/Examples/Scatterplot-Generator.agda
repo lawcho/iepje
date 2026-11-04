@@ -125,8 +125,8 @@ view m = do
     to-x : Index → X
     to-x i = if length ds == 0 then 0.0 else (svg-w * (1.0 - (nat i / nat n)))
 
-tstep : Float → Model → Model
-tstep Δt m@record {running = true} = record m {delays = Δt ∷ m .delays}
+tstep : Nat → Model → Model
+tstep Δt m@record {running = true} = record m {delays = nat Δt / 1000.0 ∷ m .delays}
 tstep Δt m = m
 
 update : Event → Model → Model
@@ -134,7 +134,5 @@ update nop m = m
 update pause m = record m {running = false}
 update resume m = record m {running = true}
 
-fps-cap = 10000 -- large number to not limit performance
-
 scatterplot-generator : IO ⊤
-scatterplot-generator = play "#scatterplot-generator-app" fps-cap m0 view update tstep
+scatterplot-generator = play "#scatterplot-generator-app" 0 m0 view update tstep

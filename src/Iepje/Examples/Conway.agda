@@ -12,7 +12,7 @@ Model = Arr.Array Bool
 
 w = 25
 
-fps = 10
+milliseconds-per-frame = 100
 
 init : Model
 init = Arr.take (w * w) $ Arr.map (primCharEquality '1')
@@ -184,4 +184,4 @@ view model = div do
   concatDocs $ Arr.indexed-map view-cell model
 
 conway : IO ⊤
-conway = play "#conway-game" fps init view update λ _ → step
+conway = play "#conway-game" milliseconds-per-frame init view update λ _ → step

@@ -26,6 +26,8 @@ open import Agda.Builtin.List
 open import Agda.Builtin.Nat
 open import Agda.Builtin.Float
 open import Agda.Builtin.Maybe
+open import Agda.Builtin.Int
+open import Agda.Builtin.Sigma
 
 private variable
   world model : Set
@@ -33,16 +35,17 @@ private variable
 
 CssSelector = String
 
+
 -- Impure version of play
-playIO
+playIO'
   : CssSelector
-  → Nat
+  → Maybe Nat
   → world
   → (world → IO (Html event))
   → (event → world → IO world)
-  → (Float → world → IO world)
+  → (Float → world → IO world) -- passed raw curent timestamp
   → IO ⊤
-playIO sel freq m0 view update step = do
+playIO' sel mperiod m0 view update step = do
   rs ← Runtime.create-Store m0
   d ← DOM.document
   w ← DOM.get-defaultView d
@@ -53,22 +56,39 @@ playIO sel freq m0 view update step = do
   DOM.appendChild (up p) (up div)
   Runtime.addView rs view update div
   -- Set up periodic updates, if the user requested them
-  case freq of λ where
-    zero         → pure tt
-    freq@(suc _) → do
-      rt ← Ref.new =<< performance-methods.now
-      let periodInMillis = primNatToFloat $ 1000 / freq
-      DOM.setInterval w
-        (λ _ → Runtime.apply-update-and-schedule-refresh rs λ m → do
-            t-prev ← Ref.get rt
-            t-now ← performance-methods.now
-            Ref.set rt t-now
-            let _-_ = primFloatMinus; _/_ = primFloatDiv
-            let elapsedSecs = (t-now - t-prev) / 1000.0
-            step elapsedSecs m
-        )
-        periodInMillis
-      pure tt
+  (just periodInMillis) ← pure mperiod
+    where nothing → pure tt
+  DOM.setInterval w
+    (λ _ → do
+      t ← performance-methods.now
+      Runtime.apply-update-and-schedule-refresh rs (step t)
+      )
+    (primNatToFloat periodInMillis)
+  pure tt
+
+private
+  floatToNat : Float → Nat
+  floatToNat f with primFloatRound f
+  ... | just (pos t) = t
+  ... | _ = 0
+
+-- Impure version of play
+playIO
+  : CssSelector
+  → Nat
+  → world
+  → (world → IO (Html event))
+  → (event → world → IO world)
+  → (Nat   → world → IO world)
+  → IO ⊤
+playIO sel period m0 view update step = do
+  t0 ← performance-methods.now
+  playIO' sel (just period)
+    (t0 , m0)
+    (λ where (_ , s) → view s)
+    (λ where e (t , s) → (t ,_) <$> update e s)
+    λ where t1 (t0 , s) → do
+      (t1 ,_ )<$> step (floatToNat (primFloatMinus t1 t0)) s
 
 -- Impure version of interact
 interactIO
@@ -78,22 +98,22 @@ interactIO
   → (event → model → IO model)
   → IO ⊤
 interactIO sel m0 view update = do
-  playIO sel 0 m0 view update λ _ → pure
+  playIO' sel nothing m0 view update λ _ → pure
 
 -- Play a game in a DOM node
 play
   : CssSelector -- Element to display under
-  → Nat         -- Number of simulation steps to take for each second of real time
+  → Nat         -- Number of milliseconds between simulation steps
   → world       -- The initial world
   → (world → Html event)     -- A function to convert the world to a document
   → (event → world → world) -- A function to handle input events
-  → (Float → world → world) -- A function to step the world one iteration. It is passed the period of time (in seconds) needing to be advanced
+  → (Nat   → world → world) -- A function to step the world one iteration. It is passed the time to advance (in milliseconds).
   → IO ⊤
-play sel freq m0 view update step = do
-  playIO sel freq m0
+play sel period m0 view update step = do
+  playIO sel period m0
     (λ   w → pure $ view     w)
     (λ e w → pure $ update e w)
-    (λ t w → pure $ step t   w)
+    (λ t w → pure $ step   t w)
 
 -- Run an interactive program in a DOM node
 interact

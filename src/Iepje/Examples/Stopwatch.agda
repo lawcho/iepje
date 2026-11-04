@@ -62,7 +62,7 @@ time-granularity = 25
 
 stopwatch : IO ⊤
 stopwatch = play "#stopwatch-app"
-  (1000 / time-granularity)
+  time-granularity
   (λ where
     .count → 0
     .lap-count → nothing
@@ -78,10 +78,6 @@ stopwatch = play "#stopwatch-app"
         nothing  → just (s .count)
       }
   )
-  λ extra-seconds s →
+  λ extra-millis s →
     if not (s .running) then s else
-    let extra-millis = primFloatRound $ primFloatTimes extra-seconds 1000.0
-    in record s {count = s .count +
-      case extra-millis of λ where
-        (just (pos x)) → x ; _ → 0
-      }
+    record s {count = s .count + extra-millis}

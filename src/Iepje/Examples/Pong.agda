@@ -16,7 +16,7 @@ open import Iepje.Prelude
 -- x/y positions are measured from the center of the field
 -- to the center of the object
 
-update-frequency = 100 -- ticks per second
+update-period = 10 -- milliseconds per tick
 _<_ = primFloatLess ; infix 19 _<_
 _+_ = primFloatPlus ; infixl 21 _+_
 _-_ = primFloatMinus; infixl 21 _-_
@@ -163,7 +163,7 @@ set-y' y' p = record p {y' = y'}
 
 pong : IO ⊤
 pong = play "#pong-game"
-  update-frequency
+  update-period
   initial-Field
   view-Field
   (λ where

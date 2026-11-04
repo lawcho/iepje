@@ -54,8 +54,8 @@ s0 .sound = refl
 -- GUI code
 ------------
 
-fps = 10
-max-Δt = 0.3   -- If animation lags more than this, pause the simulation
+target-Δmillis = 100
+max-Δmillis = 300   -- If animation lags more than this, pause the simulation
 
 max-trail-segments = 100
 comet-radius = 5
@@ -99,10 +99,10 @@ view (s ∷ ss) = do
 
 one-body : IO ⊤
 one-body = play "#verlet-one-body-app"
-  fps
+  target-Δmillis
   (s0 ∷ [])
   view
   (λ _ ss → ss)
-  (λ where Δt (s ∷ ss) → if max-Δt < Δt then (s ∷ ss) else
-              (step Δt s ∷ s ∷ take max-trail-segments ss)
+  (λ where Δmillis (s ∷ ss) → if max-Δmillis < Δmillis then (s ∷ ss) else
+              (step (Δmillis / 1000.0) s ∷ s ∷ take max-trail-segments ss)
   )

@@ -120,10 +120,8 @@ update : ∀{n} → Msg n → Vec Exercise n → Vec Exercise n
 update (submit i) = Vec.update (λ ex → record ex {millis-remaining = 0}) i
 update (change i s) = Vec.update (λ ex → record ex {current-answer = s}) i
 
-tick : ∀{n} → Float → Vec Exercise n → Vec Exercise n
-tick Δt with primFloatRound $ primFloatTimes Δt 1000.0
-tick _ | (just (pos millis)) = Vec.map (λ ex → record ex {millis-remaining = ex .millis-remaining - millis})
-tick _ | _ = λ exs → exs
+tick : ∀{n} → Nat → Vec Exercise n → Vec Exercise n
+tick Δt = Vec.map (λ ex → record ex {millis-remaining = ex .millis-remaining - Δt})
 
 mul-ex : Nat → Nat → Exercise
 mul-ex m n .question = primShowNat m ++ " * " ++ primShowNat n ++ " = "
@@ -144,4 +142,4 @@ exercises =
 import Agda.Builtin.Float
 
 quiz : IO ⊤
-quiz = play "#quiz-app" 20 exercises view update tick
+quiz = play "#quiz-app" 50 exercises view update tick

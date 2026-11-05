@@ -16,8 +16,8 @@ view-Cell c = span do
   style "font-style" "bold"; style "font-family" "sans"
   case c of λ where
     [-] → do text " "
-    [x] → do text "O"; style "color" "blue"
-    [o] → do text "X"; style "color" "red"
+    [x] → do text "X"; style "color" "red"
+    [o] → do text "O"; style "color" "blue"
 
 data Pos : Set where
     ╔  ╤ ╗

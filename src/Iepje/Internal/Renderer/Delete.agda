@@ -27,11 +27,11 @@ open Cursor {{...}}
 -- Postcondition: cursor unmoved
 delete : ∀{ns t} → {{Cursor ns t}} → vDOM ns → IO ⊤
 {-# TERMINATING #-}
-delete (text   t e  ) = void $ do DOM.removeChild (up parent) (up e)
-delete (tag ns t e d) = void $ do DOM.removeChild (up parent) (up e); c' ← init e; delete {{c'}} d
-delete (on'''   t n k) = void $ do DOM.removeEventListener t n k
+delete (text   t e  ) = DOM.removeChild (up parent) (up e) $> tt
+delete (tag ns t e d) = DOM.removeChild (up parent) (up e) >> (delete d =<<ᵢ init e)
+delete (on'''   t n k) = DOM.removeEventListener t n k $> tt
 delete (attr  k _)    = restore-attr k
 delete (style k _)    = restore-style k
-delete empty          = void $ pure tt
-delete (append d₀ d₁) = void $ do delete d₀; delete d₁
-delete (array ds) = void $ sequenceA $ map delete ds
+delete empty          = pure tt
+delete (append d₀ d₁) = delete d₀ >> delete d₁
+delete (array ds) = sequenceA (map delete ds) $> tt

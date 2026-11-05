@@ -254,9 +254,6 @@ infixl 20 _$$_
 
 -- Other IO
 
-void : IO A → IO ⊤
-void m = m >> pure tt
-
 sequenceA : List (IO A) → IO (List A)
 sequenceA [] = pure []
 sequenceA (x ∷ xs) = _∷_ <$> x <*> sequenceA xs

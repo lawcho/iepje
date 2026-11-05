@@ -159,9 +159,9 @@ view s = col do
     tr do v ╠ ; v ╬ ; v ╢
     tr do v ╚ ; v ╧ ; v ╝
   case winner (s .board) of λ where
-    nothing    →    (span do view-Cell $        s .to-move; text " to play")
-    (just [-]) → do (span do text "Game drew")                          ; hint
-    (just x)   → do (span do view-Cell $ next $ s .to-move; text " won"); hint
+    nothing    →    (span do view-Cell (s .to-move); text " to play")
+    (just [-]) → do (span do text "Game drew")        ; hint
+    (just c)   → do (span do view-Cell c; text " won"); hint
   where
   v : Pos → Html Pos
   v p = td ∘ button p $ do

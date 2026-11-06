@@ -1,13 +1,15 @@
 
 -- Widget with drag-and-drop divider
 
--- Demonstrates beacons, focus retention despite varying size
+-- Demonstrates [beacons], CSS grid, CSS subgrids,
+-- event filtering, IO in event handlers,
+-- and selection retention despite changing DOM structure
 
--- https://blog.noredink.com/post/186724971283/drag-drop-without-draggables-dropzones
+-- [beacons]: https://blog.noredink.com/post/186724971283/drag-drop-without-draggables-dropzones
 
 module Iepje.Examples.Dragger where
 
-open import Iepje.Prelude
+open import Iepje.Prelude renaming (primFloatLess to _<ᶠ_)
 
 grid-box : ∀{e} → Nat → Nat → Nat → Nat → Html e
 grid-box x₀ x₁ y₀ y₁ = do
@@ -16,7 +18,7 @@ grid-box x₀ x₁ y₀ y₁ = do
   style "grid-row-start"    $ primShowNat y₀
   style "grid-row-end"      $ primShowNat y₁
 
-insertion-list : ∀ {e} → Bool → Bool → (Maybe Nat → e) → List (Html e) → (Nat → Html e) → Html e
+insertion-list : ∀ {e} → Bool → Bool → (Nat → e) → List (Html e) → (Nat → Html e) → Html e
 insertion-list enabled debug hover docs divider = do
     style "display" "grid"
     -- List items
@@ -35,17 +37,16 @@ insertion-list enabled debug hover docs divider = do
           style "opacity" "20%"
           style "background" "green"
           style "box-shadow" "inset 0 0 0 1px red"
-        doc-onIO "mousemove" λ me → IO.do
+        doc-onIO-Maybe "mousemove" λ me → IO.do
             my ← DOM.get-clientY (up me)
             er ← DOM.getBoundingClientRect (up el)
             ey-min ← DOM.DOMRect-methods.get-top er
             ey-max ← DOM.DOMRect-methods.get-bottom er
-            let in-range = primFloatLess ey-min my && primFloatLess my ey-max
-            IO.pure (hover (if in-range then just i else nothing))
-            -- This fires l events every mouse movement. The filtering happens later, in update.
+            let in-range = ey-min <ᶠ my && my <ᶠ ey-max
+            IO.pure (if in-range then just (hover i) else nothing)
 
 data Event : Set where
-  drag-over : Maybe Nat → Event
+  drag-over : Nat → Event
   cancel-drag : Event
   lift-marker : Event
   drop-marker : Event
@@ -111,7 +112,7 @@ view m = col do
 
 
 update : Event → Model → Model
-update (drag-over (just x))
+update (drag-over x)
   r@(record  {caret-pos = just _})
   = record r {caret-pos = just x}
 update drop-marker

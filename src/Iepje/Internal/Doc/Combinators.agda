@@ -55,10 +55,10 @@ module _ where opaque
   text msg v     = do delete v; vDOM.text msg <$> (insert =<< DOM.createTextNode doc msg)
 
   attr : String → String → Doc e ns -- applies to the *parent* element
-  attr k v vd = do curse-attr k v; delete vd $> vDOM.attr k v
+  attr k v vd = do delete vd; vDOM.attr k <$> curse-attr k v
 
   style : {{Has-style ns}} → String → String → Doc e ns -- applies to the *parent* element
-  style k v vd = do curse-style k v; delete vd $> vDOM.attr k v
+  style k v vd = do delete vd; vDOM.attr k <$> curse-style k v
 
   with-parent : (DOM.Element → Doc e ns) → Doc e ns
   with-parent k = k (up parent)

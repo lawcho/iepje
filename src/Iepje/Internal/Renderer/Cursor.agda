@@ -53,6 +53,7 @@ init el = cursor
             <*> Dict.empty
 
 -- Move the cursor after a DOM Node
+-- returns the same node passed in, allowing inline use
 -- Precondition: node under cursor's parent in DOM
 curse : ∀{ns t N} → {{Cursor ns t}} → {{N extends* DOM.Node}} → N → IO N
 curse n = do
@@ -60,6 +61,7 @@ curse n = do
   pure n
 
 -- Insert a node after the cursor, and move the cursor after it
+-- returns the same node passed in, allowing inline use
 insert : ∀{ns t N} → {{Cursor ns t}} → {{N extends* DOM.Node}} → N → IO N
 insert n = do
   DOM.insertBefore (up parent) (up n) =<< next-node
@@ -75,16 +77,15 @@ restore-style k = do
     prev-styles
   action
   pure tt
-  -- TODO: potential optimization: do nothing when there was a previous style
-  --  (it will already have been applied by a call to curse-style)
 
 -- Record a style in the cache (& apply it)
-curse-style : ∀{ns t} → {{Cursor ns t}} → {{Has-style ns}} → String → String → IO ⊤
+-- returns the new value, allowing inline use
+curse-style : ∀{ns t} → {{Cursor ns t}} → {{Has-style ns}} → String → String → IO String
 curse-style {{c}} k v = do
   Dict.set k v (c .prev-styles)
   css ← get-style parent
   CSSOM.setProperty css k v
-  pure tt
+  pure v
 
 -- Apply stored attr to the parent element
 restore-attr : ∀{ns t} → {{Cursor ns t}} → String → IO ⊤
@@ -95,12 +96,12 @@ restore-attr k = do
     prev-attrs
   action
   pure tt
-  -- TODO: potential optmization: same as for restore-style
 
 -- Record an attribute in the cache (& apply it)
-curse-attr : ∀{ns t} → {{Cursor ns t}} → String → String → IO ⊤
+-- returns the new value, allowing inline use
+curse-attr : ∀{ns t} → {{Cursor ns t}} → String → String → IO String
 curse-attr {{c}} k v = do
   Dict.set k v (c .prev-attrs)
   DOM.setAttribute (up parent) k v
-  pure tt
+  pure v
 

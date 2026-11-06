@@ -58,7 +58,7 @@ module _ where opaque
   attr k v vd = do delete vd; vDOM.attr k <$> curse-attr k v
 
   style : {{Has-style ns}} → String → String → Doc e ns -- applies to the *parent* element
-  style k v vd = do delete vd; vDOM.attr k <$> curse-style k v
+  style k v vd = do delete vd; vDOM.style k <$> curse-style k v
 
   with-parent : (DOM.Element → Doc e ns) → Doc e ns
   with-parent k = k (up parent)

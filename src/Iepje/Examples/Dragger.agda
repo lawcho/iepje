@@ -42,7 +42,7 @@ insertion-list enabled debug hover docs divider = do
             er ← DOM.getBoundingClientRect (up el)
             ey-min ← DOM.DOMRect-methods.get-top er
             ey-max ← DOM.DOMRect-methods.get-bottom er
-            let in-range = ey-min <ᶠ my && my <ᶠ ey-max
+            let in-range = (i == 0 || ey-min <ᶠ my) && (my <ᶠ ey-max || i == l)
             IO.pure (if in-range then just (hover i) else nothing)
 
 data Event : Set where

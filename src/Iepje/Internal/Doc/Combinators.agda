@@ -50,7 +50,7 @@ module _ where opaque
 
   text : String → Doc e ns
   text msg₁ (vDOM.text msg₀ el) with msg₀ ==ₛ msg₁
-  ... | true  = pure (vDOM.text msg₀ el)
+  ... | true  = vDOM.text msg₀ <$> curse el
   text msg v | _ = do delete v; vDOM.text msg <$> (insert =<< DOM.createTextNode doc msg) -- DC;WG
   text msg v     = do delete v; vDOM.text msg <$> (insert =<< DOM.createTextNode doc msg)
 

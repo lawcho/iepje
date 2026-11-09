@@ -65,7 +65,7 @@ dragging m = case m .caret-pos of λ where
   nothing → false
 
 view : Model → Html Event
-view m = col do
+view m = do
   doc-on "mouseup" λ _ → drop-marker
   doc-on "blur" λ _ → cancel-drag
 

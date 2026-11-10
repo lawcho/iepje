@@ -203,7 +203,7 @@ postulate requestAnimationFrame : Window → (DOMHighResTimeStamp → IO ⊤) �
 
 -- Event
 
-postulate preventDefault : Event → IO ⊤
+postulate preventDefault : Event → IO undefined
 {-# COMPILE JS preventDefault = e => _ => (e.preventDefault()) #-}
 
 postulate key : KeyboardEvent → IO string

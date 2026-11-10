@@ -142,8 +142,8 @@ yOf = _/ w
 
 neighbours : Index1D -> Model -> List Bool
 neighbours i m =
-  let x = xOf i in
-  let y = yOf i in
+  let x = xOf i + w in  -- Adding  w avoids truncation by _-_
+  let y = yOf i + w in
   get2D (x - 1) (y - 1) m ∷ get2D (x   ) (y - 1) m ∷ get2D (x + 1) (y - 1) m ∷
   get2D (x - 1) (y    ) m ∷                          get2D (x + 1) (y    ) m ∷
   get2D (x - 1) (y + 1) m ∷ get2D (x   ) (y + 1) m ∷ get2D (x + 1) (y + 1) m ∷

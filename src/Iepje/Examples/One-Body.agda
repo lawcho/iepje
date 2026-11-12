@@ -51,11 +51,12 @@ s0 .v = 30.0 ,   0.0  -- The particle begins travelling due east
 s0 .½a = _
 s0 .sound = refl
 
+simulation-Δt = 0.1
+
 -- GUI code
 ------------
 
 target-Δmillis = 100
-max-Δmillis = 300   -- If animation lags more than this, pause the simulation
 
 max-trail-segments = 100
 comet-radius = 5
@@ -103,6 +104,5 @@ one-body = play "#verlet-one-body-app"
   (s0 ∷ [])
   view
   (λ _ ss → ss)
-  (λ where Δmillis (s ∷ ss) → if max-Δmillis < Δmillis then (s ∷ ss) else
-              (step (Δmillis / 1000.0) s ∷ s ∷ take max-trail-segments ss)
+  (λ where _ (s ∷ ss) → (step simulation-Δt s ∷ s ∷ take max-trail-segments ss)
   )

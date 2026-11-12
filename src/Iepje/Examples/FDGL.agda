@@ -124,8 +124,11 @@ open State
 cool : State → State
 cool r = record r {v = r .v * insulation}
 
-step' : Float → State → State
-step' Δt = cool ∘ step Δt
+simulation-Δt : Config.Time
+simulation-Δt = 0.1
+
+step' : State → State
+step' = cool ∘ step simulation-Δt
 
 hw = 150 -- half of the scene's width, in pixels
 
@@ -155,7 +158,6 @@ s0 .sound = refl
 -----------
 
 target-Δt = 50  -- target time between simulation steps
-max-Δt = 100   -- If simulation lags more than this, pause the simulation
 
 arc-dots = 15
 arc-width = 1
@@ -197,4 +199,4 @@ fdgl = play "#verlet-fdgl-app"
   s0
   view
   (λ _ s → s)
-  (λ where Δt → if max-Δt < Δt then (λ x → x) else step' (Δt / 1000.0))
+  (λ _ → step')
